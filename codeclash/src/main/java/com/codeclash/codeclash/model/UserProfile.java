@@ -13,5 +13,4 @@ public class UserProfile {
     private String phoneNumber;
     private String instituteName;
 
-
 }
