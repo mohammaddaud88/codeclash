@@ -1,25 +1,24 @@
 package com.codeclash.codeclash.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
-
-@Document("CodeClashSignUp")
+@Document(collection = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserSignUp {
+public class User {
     @Id
-    private  String id;
+    private String id;
+
     private String name;
+    private String username;
     private String email;
     private String password;
-
 }
+
+
+// https://medium.com/@Lakshitha_Fernando/jwt-spring-security-6-and-spring-boot-3-with-simple-project-819d84e09af2
