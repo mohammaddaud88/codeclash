@@ -9,5 +9,4 @@ public class CodeclashApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CodeclashApplication.class, args);
 	}
-
 }
