@@ -2,7 +2,10 @@ package com.codeclash.codeclash.config;
 
 
 import com.codeclash.codeclash.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +22,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collection;
 @Component
 @EnableWebSecurity
 @AllArgsConstructor
@@ -39,9 +47,28 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.csrf(csrf->csrf.disable())
+        http
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration configuration = new CorsConfiguration();
+                        configuration.setAllowCredentials(true);
+
+                        configuration.setAllowedOrigins(Arrays.asList("http://192.168.9.100:3000","http://localhost:3000"
+                        ));
+                        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
+                        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                        configuration.setAllowedHeaders(Arrays.asList("*"));
+                        configuration.setMaxAge(Duration.ofMinutes(5L));
+                        return configuration;
+                    }
+                }))
+                .csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(auth ->{
                     auth.requestMatchers("/api/auth/**").permitAll();
+                    auth.requestMatchers("/api/quiz/**").permitAll();
+                    auth.requestMatchers("/ws/**").permitAll();
+                    auth.requestMatchers("/api/open/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
@@ -55,6 +82,5 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
         return configuration.getAuthenticationManager();
     }
-
 
 }

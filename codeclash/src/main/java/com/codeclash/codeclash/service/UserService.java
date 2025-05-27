@@ -1,6 +1,7 @@
 package com.codeclash.codeclash.service;
 
 import com.codeclash.codeclash.dto.UserRegistrationDto;
+import com.codeclash.codeclash.exceptions.EmailAlreadyExistsException;
 import com.codeclash.codeclash.model.User;
 import com.codeclash.codeclash.model.UserProfile;
 import com.codeclash.codeclash.repository.UserProfileRepo;
@@ -22,7 +23,7 @@ public class UserService {
 
     public User registerUser(UserRegistrationDto userRegistrationDto){
         if(userRepository.existsByEmail(userRegistrationDto.getEmail())){
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
 
         User user = new User();

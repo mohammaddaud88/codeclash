@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -20,12 +17,13 @@ public class Room implements Serializable {
 
     private String host;
     private String difficulty;
+    private String topic;
     private Set<String> players = new HashSet<>();
     public Room(String roomCode,String host){
         this.roomCode = roomCode;
         this.host = host;
+        this.players= new HashSet<>();
         this.players.add(host);
-
     }
 
     public void addPlayer(String playerUsername){

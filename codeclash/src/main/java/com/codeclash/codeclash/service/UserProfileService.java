@@ -20,25 +20,32 @@ public class UserProfileService {
     private UserService userService;
 
 
-    public UserProfile updateProfile(UserProfileDto userProfileDto,String id) throws Exception {
-        Optional<UserProfile> existingUserProfile = userProfileRepo.findById(id);
-        UserProfile userProfile;
-        if(existingUserProfile.isPresent()){
-            userProfile = existingUserProfile.get();
-            userProfile.setDob(userProfileDto.getDob());
-            userProfile.setCollege(userProfileDto.getCollege());
-            userProfile.setDepartment(userProfileDto.getDepartment());
-            userProfile.setPhoneNumber(userProfileDto.getPhoneNumber());
-            userProfile.setProfilePicUrl(userProfileDto.getProfilePicUrl());
-            userProfile.setName(userProfileDto.getName());
-            userProfile.setGender(userProfileDto.getGender());
-            userProfile.setGithubLink(userProfileDto.getGithubLink());
-            userProfile.setLinkedinLink(userProfileDto.getLinkedinLink());
-            userProfileRepo.save(userProfile);
+    public UserProfile updateProfile(UserProfileDto userProfileDto,String username) throws Exception {
+        UserProfile existingUserProfile = userProfileRepo.findByusername(username);
+        if(existingUserProfile != null){
+            existingUserProfile.setDob(userProfileDto.getDob());
+            existingUserProfile.setCollege(userProfileDto.getCollege());
+            existingUserProfile.setDepartment(userProfileDto.getDepartment());
+            existingUserProfile.setPhoneNumber(userProfileDto.getPhoneNumber());
+            existingUserProfile.setProfilePicUrl(userProfileDto.getProfilePicUrl());
+            existingUserProfile.setName(userProfileDto.getName());
+            existingUserProfile.setGender(userProfileDto.getGender());
+            existingUserProfile.setGithubLink(userProfileDto.getGithubLink());
+            existingUserProfile.setLinkedinLink(userProfileDto.getLinkedinLink());
+            userProfileRepo.save(existingUserProfile);
         } else {
             throw new UsernameNotFoundException("User not found");
         }
-        return userProfile;
+        return existingUserProfile;
+    }
+
+    public UserProfile getByUsername(String username) throws Exception{
+        UserProfile userProfile = userProfileRepo.findByusername(username);
+        if(userProfile != null) {
+            return userProfile;
+        } else {
+            throw new UsernameNotFoundException("Username not found");
+        }
     }
 
 }

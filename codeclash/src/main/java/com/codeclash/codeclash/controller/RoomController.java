@@ -5,12 +5,10 @@ import com.codeclash.codeclash.dto.RoomRequestDto;
 import com.codeclash.codeclash.model.Room;
 import com.codeclash.codeclash.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+@CrossOrigin(origins = "http://192.168.9.100:3000", originPatterns = "http://localhost:3000")
 @RestController
 @RequestMapping("/api")
 public class RoomController {
@@ -22,8 +20,8 @@ public class RoomController {
     private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/room/create")
-    public String createRoom(@RequestParam String username){
-        String roomCode = roomService.createRoom(username);
+    public String createRoom(@RequestBody Room room){
+        String roomCode = roomService.createRoom(room);
         return roomCode;
     }
 
@@ -36,6 +34,12 @@ public class RoomController {
         } else {
             return "Room not found";
         }
+    }
+
+
+    @GetMapping("/room/getById")
+    public Room getById(@RequestParam String roomCode){
+        return roomService.getRoom(roomCode);
     }
 
 

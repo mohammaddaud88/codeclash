@@ -2,7 +2,6 @@ package com.codeclash.codeclash.repository;
 
 
 import com.codeclash.codeclash.model.User;
-import com.codeclash.codeclash.model.UserProfile;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
