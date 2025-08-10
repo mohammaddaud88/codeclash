@@ -1,34 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react';
 import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Navbar from './components/Navbar';
+import HomePage from './components/Home'
+import Login from './components/Login'
+import Signup from './components/Signup'
+import Explore from './components/Explore'
+import Problems from './components/Problems'
+import ProblemSolvePage from './components/IndivisualProblemPage';
+
+// Placeholder components for pages to be created
+const Playground = () => <div className="text-center text-white text-2xl pt-10">Playground</div>;
+const Leaderboard = () => <div className="text-center text-white text-2xl pt-10">Leaderboard</div>;
+const Profile = () => <div className="text-center text-white text-2xl pt-10">Profile</div>;
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <BrowserRouter>
+      <Navbar />
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/problems" element={<Problems />} />
+          <Route path="/problems/:problemId" element={<ProblemSolvePage />} />
+          <Route path="/playground" element={<Playground />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   )
 }
 
