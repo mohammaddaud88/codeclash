@@ -10,7 +10,7 @@ const HomePage = () => {
     },
     {
       icon: Zap,
-      title: "AI-Powered Insights",
+      title: "AI-Powered Tips",
       description: "Get intelligent feedback, optimization suggestions, and debugging help powered by AI."
     },
     {
