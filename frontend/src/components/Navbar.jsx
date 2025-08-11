@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Code, User, Trophy, Play, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Code, User, Trophy, Play, LayoutDashboard, BookOpen } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 const Navbar = () => {
@@ -13,6 +13,7 @@ const Navbar = () => {
     { href: '/explore', label: 'Explore', icon: LayoutDashboard },
     { href: '/problems', label: 'Problems', icon: Code },
     { href: '/playground', label: 'Playground', icon: Play },
+    { href: '/topics', label: 'Topics', icon: BookOpen },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/profile', label: 'Profile', icon: User },
   ];
