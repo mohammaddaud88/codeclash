@@ -406,7 +406,7 @@ var twoSum = function(nums, target) {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-950 flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+    <div className={`h-screen bg-slate-950 flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
       {/* Enhanced Header */}
       <div className="bg-slate-900 border-b border-slate-800 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -474,7 +474,7 @@ var twoSum = function(nums, target) {
       {/* Main Content */}
       <div className="flex-1 flex">
         {/* Left Panel - Problem Description */}
-        <div className="w-1/2 bg-slate-900 border-r border-slate-800 flex flex-col">
+        <div className="w-1/2 bg-slate-900 border-r border-slate-800 flex flex-col h-full overflow-y-auto overflow-x-hidden">
           {/* Enhanced Tabs */}
           <div className="flex border-b border-slate-800">
             {[
@@ -499,7 +499,7 @@ var twoSum = function(nums, target) {
           </div>
 
           {/* Enhanced Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto" >
             {activeTab === 'description' && (
               <div className="p-6 space-y-6">
                 {/* Problem Statement */}

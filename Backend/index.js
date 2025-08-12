@@ -2,12 +2,14 @@ const mongoConnection = require('./connection')
 const express = require('express')
 const app = express()
 const PORT = 8000
+const authRoutes = require('./routes/authroutes')
 
 
+// Middlewares
+app.use(express.json()); 
 
-
-
-
+// maped routes
+app.use('/auth',authRoutes);
 
 
 

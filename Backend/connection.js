@@ -4,6 +4,8 @@ const url = "mongodb+srv://daudansarikld:admin0000@codeclash.kcs3ss0.mongodb.net
 function connectMongoDB(){
     mongoose.connect(url).then(()=>{
         console.log('MongoDB Connected successfully')
+    }).catch((err)=>{
+        console.log(err);
     })
 }
 
