@@ -440,7 +440,7 @@
         "code": {
           "python": "def maxSubArray(nums):\n    \"\"\"\n    Kadane's Algorithm - O(n) time, O(1) space\n    \"\"\"\n    max_sum = current_sum = nums[0]\n    \n    for num in nums[1:]:\n        # Either start new subarray or extend existing\n        current_sum = max(num, current_sum + num)\n        # Update global maximum\n        max_sum = max(max_sum, current_sum)\n    \n    return max_sum",
           "java": "public int maxSubArray(int[] nums) {\n    /*\n     * Kadane's Algorithm - O(n) time, O(1) space\n     */\n    int maxSum = nums[0];\n    int currentSum = nums[0];\n    \n    for (int i = 1; i < nums.length; i++) {\n        // Either start new subarray or extend existing\n        currentSum = Math.max(nums[i], currentSum + nums[i]);\n        // Update global maximum\n        maxSum = Math.max(maxSum, currentSum);\n    }\n    \n    return maxSum;\n}",
-          "cpp": "int maxSubArray(vector<int>& nums) {\n    /*\n     * Kadane's Algorithm - O(n) time, O(1) space\n     */\n    int maxSum = nums[0];\n    int currentSum = nums[0];\n    \n    for (int i = 1; i < nums.size(); i++) {\n        // Either start new subarray or extend existing\n        currentSum = max(nums[i], currentSum + nums[i]);\n        // Update global maximum\n        maxSum = max(maxSum, currentSum);\n    }\n    \n    return maxSum;\n}",
+          "cpp": "int maxSubArray(vector<int>& nums) {\n    /*\n     * Kadane's Algorithm - O(n) time, O(1) space\n     */\n    int maxSum = nums[0];\n    int currentSum = nums[0];\n    \n    for (int i = 1; i < nums.size(); i++) {\n        // Either start new subarray or extend existing\n        currentSum = max(nums[i], currentSum + nums[i]);\n        // Update global maximum\n        maxSum = max(max_sum, currentSum);\n    }\n    \n    return maxSum;\n}",
           "javascript": "function maxSubArray(nums) {\n    /*\n     * Kadane's Algorithm - O(n) time, O(1) space\n     */\n    let maxSum = nums[0];\n    let currentSum = nums[0];\n    \n    for (let i = 1; i < nums.length; i++) {\n        // Either start new subarray or extend existing\n        currentSum = Math.max(nums[i], currentSum + nums[i]);\n        // Update global maximum\n        maxSum = Math.max(maxSum, currentSum);\n    }\n    \n    return maxSum;\n}"
         }
       },
@@ -480,19 +480,148 @@
       ],
       "createdAt": "2024-01-17T10:00:00Z",
       "updatedAt": "2024-12-15T10:00:00Z"
+    },
+    {
+      "id": "valid-parentheses",
+      "title": "Valid Parentheses",
+      "difficulty": "Easy",
+      "level": 3,
+      "category": "Stack",
+      "tags": ["String", "Stack"],
+      "companies": [
+        {
+          "name": "Facebook",
+          "frequency": "High",
+          "lastAsked": "2024-12-01"
+        },
+        {
+          "name": "Microsoft",
+          "frequency": "High",
+          "lastAsked": "2024-11-20"
+        },
+        {
+          "name": "Bloomberg",
+          "frequency": "Medium",
+          "lastAsked": "2024-11-15"
+        }
+      ],
+      "statistics": {
+        "totalSubmissions": 3456789,
+        "acceptedSubmissions": 1876543,
+        "acceptanceRate": 54.3,
+        "likes": 9876,
+        "dislikes": 432,
+        "averageRuntime": "4ms",
+        "memoryUsage": "6.3MB"
+      },
+      "description": "## Problem Statement\n\nGiven a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.",
+      "examples": [
+        {
+          "input": "s = \"()\"",
+          "output": "true"
+        },
+        {
+          "input": "s = \"()[]{}\"",
+          "output": "true"
+        },
+        {
+          "input": "s = \"(]\" ",
+          "output": "false"
+        }
+      ],
+      "constraints": [
+        "1 <= s.length <= 10^4",
+        "s consists of parentheses only '()[]{}'."
+      ],
+      "hints": [
+        "Use a stack to keep track of opening brackets.",
+        "When you encounter a closing bracket, check if the top of the stack is the corresponding opening bracket.",
+        "If the stack is empty at the end, the string is valid."
+      ],
+      "testCases": [
+        {
+          "id": 1,
+          "input": {
+            "s": "()"
+          },
+          "expectedOutput": true,
+          "hidden": false,
+          "description": "Simple case"
+        },
+        {
+          "id": 2,
+          "input": {
+            "s": "()[]{}"
+          },
+          "expectedOutput": true,
+          "hidden": false,
+          "description": "Multiple bracket types"
+        },
+        {
+          "id": 3,
+          "input": {
+            "s": "(]"
+          },
+          "expectedOutput": false,
+          "hidden": false,
+          "description": "Mismatched brackets"
+        },
+        {
+          "id": 4,
+          "input": {
+            "s": "([)]"
+          },
+          "expectedOutput": false,
+          "hidden": true,
+          "description": "Incorrect order"
+        },
+        {
+          "id": 5,
+          "input": {
+            "s": "{[]}"
+          },
+          "expectedOutput": true,
+          "hidden": true,
+          "description": "Nested brackets"
+        }
+      ],
+      "solution": {
+        "approach": "Stack",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(n)",
+        "intuition": "The key to solving this problem is to use a stack. When we encounter an opening bracket, we push it onto the stack. When we encounter a closing bracket, we check if the top of the stack is the corresponding opening bracket. If it is, we pop the stack. If it is not, or if the stack is empty, the string is invalid. At the end, if the stack is empty, the string is valid.",
+        "algorithm": [
+          "1. Create an empty stack.",
+          "2. Create a map to store the matching brackets.",
+          "3. Iterate through the string.",
+          "4. If the character is an opening bracket, push it onto the stack.",
+          "5. If the character is a closing bracket, check if the stack is empty. If it is, return false.",
+          "6. If the stack is not empty, pop the stack and check if the popped element is the corresponding opening bracket. If it is not, return false.",
+          "7. At the end, if the stack is empty, return true. Otherwise, return false."
+        ],
+        "code": {
+          "python": "def isValid(s):\n    stack = []\n    mapping = {\")\": \"(\", \"}\": \"{\", \"]\": \"[\"}\n    for char in s:\n        if char in mapping:\n            top_element = stack.pop() if stack else '#\\'\n            if mapping[char] != top_element:\n                return False\n        else:\n            stack.append(char)\n    return not stack",
+          "java": "public boolean isValid(String s) {\n    Stack<Character> stack = new Stack<Character>();\n    for (char c : s.toCharArray()) {\n        if (c == '(')\n            stack.push(')');\n        else if (c == '{')\n            stack.push('}');\n        else if (c == '[')\n            stack.push(']');\n        else if (stack.isEmpty() || stack.pop() != c)\n            return false;\n    }\n    return stack.isEmpty();\n}",
+          "cpp": "bool isValid(string s) {\n    stack<char> st;\n    for (char c : s) {\n        if (c == '(' || c == '{' || c == '[') {\n            st.push(c);\n        } else {\n            if (st.empty() || (st.top() == '(' && c != ')') || (st.top() == '{' && c != '}') || (st.top() == '[' && c != ']')) {\n                return false;\n            }\n            st.pop();\n        }\n    }\n    return st.empty();\n}",
+          "javascript": "var isValid = function(s) {\n    const stack = [];\n    const map = {\n        \"(\": \")\",\n        \"{\": \"}\",\n        \"[\": \"]\"\n    };\n    for (let i = 0; i < s.length; i++) {\n        let c = s[i];\n        if (map[c]) {\n            stack.push(map[c]);\n        } else if (c !== stack.pop()) {\n            return false;\n        }\n    }\n    return !stack.length;\n}"
+        }
+      },
+      "createdAt": "2025-08-10T12:00:00Z",
+      "updatedAt": "2025-08-10T12:00:00Z"
     }
   ],
   "metadata": {
-    "totalProblems": 2,
+    "totalProblems": 3,
     "difficultyDistribution": {
-      "Easy": 1,
+      "Easy": 2,
       "Medium": 1,
       "Hard": 0
     },
     "categoryDistribution": {
       "Arrays": 1,
-      "Dynamic Programming": 1
+      "Dynamic Programming": 1,
+      "Stack": 1
     },
-    "lastUpdated": "2024-12-15T10:00:00Z"
+    "lastUpdated": "2025-08-10T12:00:00Z"
   }
 }

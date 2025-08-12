@@ -1,12 +1,29 @@
-# React + Vite
+# CodeClash - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the source code for the CodeClash user interface, built with React and Vite.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js (v18 or later)
+- npm
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+
+1.  Navigate to the `frontend` directory:
+    ```sh
+    cd frontend
+    ```
+2.  Install the required dependencies:
+    ```sh
+    npm install
+    ```
+
+### Running the Development Server
+
+1.  Start the Vite development server:
+    ```sh
+    npm run dev
+    ```
+2.  Open your browser and go to `http://localhost:5173` (or the address shown in your terminal).

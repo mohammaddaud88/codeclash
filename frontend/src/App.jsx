@@ -8,6 +8,8 @@ import Signup from './components/Signup'
 import Explore from './components/Explore'
 import Problems from './components/Problems'
 import ProblemSolvePage from './components/IndivisualProblemPage';
+import Topics from './components/Topics';
+import TopicPage from './components/TopicPage';
 
 // Placeholder components for pages to be created
 const Playground = () => <div className="text-center text-white text-2xl pt-10">Playground</div>;
@@ -24,6 +26,8 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/problems/:problemId" element={<ProblemSolvePage />} />
+          <Route path="/topics" element={<Topics />} />
+          <Route path="/topics/:topicName" element={<TopicPage />} />
           <Route path="/playground" element={<Playground />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<Profile />} />
