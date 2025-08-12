@@ -12,7 +12,7 @@ const Navbar = () => {
   const navLinks = [
     { href: '/explore', label: 'Explore', icon: LayoutDashboard },
     { href: '/problems', label: 'Problems', icon: Code },
-    { href: '/playground', label: 'Playground', icon: Play },
+    // { href: '/playground', label: 'Playground', icon: Play },
     { href: '/topics', label: 'Topics', icon: BookOpen },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/profile', label: 'Profile', icon: User },
