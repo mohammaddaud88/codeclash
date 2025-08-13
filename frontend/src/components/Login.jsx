@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Code, Mail, Lock, ArrowRight, Github, Chrome, Zap, Users, Trophy } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPageSideBySide = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,6 +11,8 @@ const LoginPageSideBySide = () => {
     rememberMe: false
   });
 
+  const navigate = useNavigate();
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -17,9 +21,34 @@ const LoginPageSideBySide = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    try{
+      const res = await fetch('http://localhost:8000/auth/login',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+
+        },
+        body:JSON.stringify({
+          email:formData.email,
+          password:formData.password,
+          rememberMe:formData.rememberMe
+        })
+      })
+
+      if(!res.ok){
+        throw new Error('Something went wrong while login');
+      }
+
+      const resp = res.json();
+      sessionStorage.setItem('isLoggedIn',true);
+      toast.success(resp.message);
+      navigate('/')
+    }catch(err){
+      console.log(err);
+      toast.error(err.message);
+    }
   };
 
   return (

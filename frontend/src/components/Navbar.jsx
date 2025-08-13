@@ -1,21 +1,42 @@
 import React, { useState } from 'react';
-import { Menu, X, Code, User, Trophy, Play, LayoutDashboard, BookOpen } from 'lucide-react';
+import { Menu, X, Code, User, Trophy, Play, LayoutDashboard, BookOpen, LogOut } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-//   const is
+  const isLoggedIn = sessionStorage.getItem('isLoggedIn') ? true : false;
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const logout = async () => {
+    try {
+      // Call your logout API endpoint
+      const response = await fetch('http://localhost:8000/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Include cookies
+      });
+
+
+      
+      if (response.ok) {
+        sessionStorage.removeItem('isLoggedIn');
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  // Filter nav links based on login status
   const navLinks = [
     { href: '/explore', label: 'Explore', icon: LayoutDashboard },
     { href: '/problems', label: 'Problems', icon: Code },
-    // { href: '/playground', label: 'Playground', icon: Play },
     { href: '/topics', label: 'Topics', icon: BookOpen },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-    { href: '/profile', label: 'Profile', icon: User },
+    // Only show Profile if logged in
+    ...(isLoggedIn ? [{ href: '/profile', label: 'Profile', icon: User }] : []),
   ];
 
   return (
@@ -58,12 +79,26 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-cyan-400 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-cyan-400/20">
-              Sign In
-            </Link>
-            <Link to="/signup" className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25">
-              Sign Up
-            </Link>
+            {isLoggedIn ? (
+              // Show logout button when logged in
+              <button
+                onClick={logout}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-red-400 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-400/20"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            ) : (
+              // Show login/signup when not logged in
+              <>
+                <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-cyan-400 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-cyan-400/20">
+                  Sign In
+                </Link>
+                <Link to="/signup" className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25">
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -108,20 +143,37 @@ const Navbar = () => {
             
             {/* Mobile Actions */}
             <div className="pt-4 space-y-2 border-t border-slate-800">
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-center px-4 py-3 text-base font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-cyan-400 rounded-lg transition-all duration-200"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/signup"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-center px-4 py-3 text-base font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all duration-200"
-              >
-                Sign Up
-              </Link>
+              {isLoggedIn ? (
+                // Show logout button when logged in (mobile)
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center justify-center space-x-2 w-full px-4 py-3 text-base font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-red-400 rounded-lg transition-all duration-200"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </button>
+              ) : (
+                // Show login/signup when not logged in (mobile)
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full text-center px-4 py-3 text-base font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-cyan-400 rounded-lg transition-all duration-200"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full text-center px-4 py-3 text-base font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all duration-200"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

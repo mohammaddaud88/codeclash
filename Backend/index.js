@@ -4,10 +4,17 @@ const app = express()
 const PORT = 8000
 const authRoutes = require('./routes/authroutes')
 const dotenv = require('dotenv').config();
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 
 // Middlewares
 app.use(express.json()); 
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true 
+}))
+app.use(cookieParser())
 
 // maped routes
 app.use('/auth',authRoutes);

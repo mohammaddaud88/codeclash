@@ -10,6 +10,8 @@ import Problems from './components/Problems'
 import ProblemSolvePage from './components/IndivisualProblemPage';
 import Topics from './components/Topics';
 import TopicPage from './components/TopicPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
 
 // Placeholder components for pages to be created
 const Playground = () => <div className="text-center text-white text-2xl pt-10">Playground</div>;
@@ -19,6 +21,18 @@ const Profile = () => <div className="text-center text-white text-2xl pt-10">Pro
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Navbar />
       <main>
         <Routes>
