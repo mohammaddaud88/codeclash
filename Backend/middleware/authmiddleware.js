@@ -2,33 +2,32 @@ const jwt = require("jsonwebtoken");
 const secret = "mdkdfjdhfkjhd@#$%&safh8840505312@!$%#^&*";
 
 const authMiddleware = (req, res, next) => {
+  // Option 1: Get token from Authorization header but it is not in my project I am using cookie based auth
+  let token;
   const authHeader = req.headers.authorization;
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({
-        message: "Unauthorized: No token provided or token is not Bearer type",
-      });
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
   }
 
-  const token = authHeader.split(" ")[1]; // Extract the token from "Bearer <token>"
+  // Option 2: Get token from cookie if no auth header
+  if (!token && req.cookies?.authToken) {
+    token = req.cookies.authToken;
+  }
 
+  // If still no token → reject
   if (!token) {
-    return res
-      .status(401)
-      .json({
-        message: "Unauthorized: Token not found in Authorization header",
-      });
+    return res.status(401).json({
+      message: "Unauthorized: No token provided",
+    });
   }
 
   try {
-    const decodedToken = jwt.verify(token, secret);
-
-    req.user = decodedToken; // Attach decoded user information to the request object
+    const decoded = jwt.verify(token, secret);
+    req.user = decoded; // Attach decoded token payload to request
     next();
   } catch (err) {
-    console.error("Authentication error in adminMiddleware:", err.message);
+    console.error("Authentication Error:", err.message);
+
     if (err.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Invalid token: Malformed" });
     }

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Code, Mail, Lock, User, ArrowRight, Github, Chrome, Check, Zap, Users, Trophy } from 'lucide-react';
+import {toast} from 'react-toastify';
+import {useNavigate} from 'react-router-dom'
+
 
 const SignupPageSideBySide = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +20,7 @@ const SignupPageSideBySide = () => {
     score: 0,
     feedback: []
   });
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -80,22 +84,44 @@ const SignupPageSideBySide = () => {
     return 'Strong';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
     
     if (!formData.agreeToTerms) {
-      alert('Please agree to the terms and conditions');
+      toast.info('Please agree to the terms and conditions');
       return;
     }
 
-    // Handle signup logic here
-    console.log('Signup attempt:', formData);
+    try{
+      const res = await fetch('http://localhost:8000/auth/signup',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+        },
+        body:JSON.stringify({
+          name:formData.fullName,
+          email:formData.email,
+          password:formData.password,
+          agreeToTerms:formData.agreeToTerms,
+          subscribeNewsletter:formData.subscribeNewsletter
+        })
+      });
+  
+      if(!res.ok){
+        throw new Error('Something went wrong while signing up')
+      }
+      toast.success('SignUp Successfull. Redirecting...')
+      navigate('/login')
+    }catch(err){
+      console.log(err);
+      toast.error(err.message);
+    }
   };
 
   return (
