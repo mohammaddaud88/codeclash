@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Code, FileText, BrainCircuit, Search, CheckCircle, XCircle } from 'lucide-react';
+import axios from 'axios'; // <-- 1. IMPORT AXIOS
+
+// Import the new AskAI component
+import AskAI from './AskAI';
 
 // Dummy data - replace with actual data fetching
 const topicData = {
@@ -143,12 +147,13 @@ const Quiz = ({ quiz, onComplete }) => {
             {q.options.map((option, j) => (
               <button
                 key={j}
-                onClick={() => handleAnswer(i, option)}
+                onClick={() => !submitted && handleAnswer(i, option)}
                 className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
                   answers[i] === option
-                    ? 'bg-cyan-600'
+                    ? 'bg-cyan-600 text-white'
                     : 'bg-slate-700/50 hover:bg-slate-600/50'
                 }`}
+                disabled={submitted}
               >
                 {option}
               </button>
@@ -176,11 +181,16 @@ const Quiz = ({ quiz, onComplete }) => {
   );
 };
 
-const LearningNavigator = ({ onStart }) => {
+// <-- 2. ADD isLoading prop
+const LearningNavigator = ({ onStart, isLoading }) => {
   const [goal, setGoal] = useState('');
   const [level, setLevel] = useState('');
 
   const handleStart = () => {
+    if (!goal || !level) {
+        alert("Please select your goal and level.");
+        return;
+    }
     onStart(goal, level);
   };
 
@@ -190,7 +200,7 @@ const LearningNavigator = ({ onStart }) => {
       <div className="space-y-4">
         <div>
           <label className="block text-slate-300 mb-2">Your Goal:</label>
-          <select onChange={(e) => setGoal(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2 px-3 text-white">
+          <select onChange={(e) => setGoal(e.target.value)} disabled={isLoading} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2 px-3 text-white disabled:opacity-50">
             <option value="">Select a goal</option>
             <option value="basics">Learn the basics</option>
             <option value="interview">Prepare for interviews</option>
@@ -198,31 +208,55 @@ const LearningNavigator = ({ onStart }) => {
         </div>
         <div>
           <label className="block text-slate-300 mb-2">Your Level:</label>
-          <select onChange={(e) => setLevel(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2 px-3 text-white">
+          <select onChange={(e) => setLevel(e.target.value)} disabled={isLoading} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2 px-3 text-white disabled:opacity-50">
             <option value="">Select your level</option>
             <option value="beginner">Beginner</option>
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>
           </select>
         </div>
-        <button onClick={handleStart} className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all duration-200">
-          Start Learning
+        <button onClick={handleStart} disabled={isLoading} className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          {isLoading ? 'Generating...' : 'Start Learning'}
         </button>
       </div>
     </div>
   );
 };
 
-const TopicPage = () => {
+// Assume you get the current user from your auth context or a higher-level component
+const TopicPage = ({ currentUser = { id: 'mock-user-123' } }) => {
   const { topicName } = useParams();
   const formattedTopicName = topicName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-  const [learningPath, setLearningPath] = useState(null);
+  // <-- 3. ADD STATE FOR LOADING AND PATH CONTENT
+  const [isPathLoading, setIsPathLoading] = useState(false);
+  const [hasStartedLearning, setHasStartedLearning] = useState(false);
+  const [learningPathContent, setLearningPathContent] = useState('');
   const [unlockedSections, setUnlockedSections] = useState(['introduction']);
 
-  const handleStartLearning = (goal, level) => {
-    // In a real app, this would be a more complex logic to generate a path
-    setLearningPath({ goal, level });
+  // <-- 4. UPDATE handleStartLearning TO CALL THE API
+  const handleStartLearning = async (goal, level) => {
+    setIsPathLoading(true);
+    setLearningPathContent('');
+
+    try {
+        const response = await axios.post('/api/gemini/generate', {
+            userId: currentUser.id,
+            contentType: 'learning_path',
+            details: {
+                goal: goal,
+                level: level,
+                topic: formattedTopicName
+            }
+        });
+        setLearningPathContent(response.data.content);
+        setHasStartedLearning(true); // Show the main content now
+    } catch (error) {
+        console.error("Failed to generate learning path:", error);
+        setLearningPathContent("Sorry, we couldn't generate a learning path. Please try again.");
+    } finally {
+        setIsPathLoading(false);
+    }
   };
 
   const handleNextSection = (currentSection) => {
@@ -287,10 +321,18 @@ const TopicPage = () => {
 
           {/* Right Column */}
           <div className="lg:col-span-2 space-y-8">
-            {!learningPath ? (
-              <LearningNavigator onStart={handleStartLearning} />
+            {!hasStartedLearning ? (
+              <LearningNavigator onStart={handleStartLearning} isLoading={isPathLoading} />
             ) : (
               <div>
+                {/* <-- 5. DISPLAY THE GENERATED PATH --> */}
+                {learningPathContent && (
+                    <div className="bg-slate-800/50 rounded-xl shadow-lg border border-slate-800 p-6 mb-8">
+                        <h3 className="text-2xl font-bold text-slate-100 mb-4">Your Personalized Path</h3>
+                        <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{learningPathContent}</p>
+                    </div>
+                )}
+
                 {Object.keys(topicData.blog).map((sectionKey) => (
                   <ProgressiveDisclosure
                     key={sectionKey}
@@ -302,18 +344,8 @@ const TopicPage = () => {
                 <Quiz quiz={topicData.quiz} onComplete={handleQuizComplete} />
               </div>
             )}
-             <div className="bg-slate-800/50 rounded-xl shadow-lg border border-slate-800 p-8">
-              <div className="flex items-center mb-4">
-                <BrainCircuit className="w-8 h-8 text-cyan-400 mr-4" />
-                <h2 className="text-2xl font-bold text-slate-100">Ask AI</h2>
-              </div>
-              <div className="relative">
-                <input type="text" placeholder="Ask a question..." className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-                <button className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-cyan-400">
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+             {/* <-- 6. REPLACE THE OLD ASK AI SECTION WITH THE COMPONENT --> */}
+             <AskAI userId={currentUser.id} topic={formattedTopicName} />
           </div>
         </div>
       </div>
