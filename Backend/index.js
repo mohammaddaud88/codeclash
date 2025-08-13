@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const PORT = 8000
 const authRoutes = require('./routes/authroutes')
+const dotenv = require('dotenv').config();
 
 
 // Middlewares
