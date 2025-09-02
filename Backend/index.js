@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const PORT = 8000
 const authRoutes = require('./routes/authroutes')
+const dotenv = require('dotenv').config();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const codeRoutes = require('./routes/code')
