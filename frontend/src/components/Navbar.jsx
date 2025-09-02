@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Menu, X, Code, User, Trophy, Play, LayoutDashboard, BookOpen, LogOut } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') ? true : false;
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
+  useEffect(()=>{
+    const checkLoginStatus = () => {
+      const loginStatus = sessionStorage.getItem('isLoggedIn') ? true : false;
+      setIsLoggedIn(loginStatus);
+    };
+
+    checkLoginStatus();
+
+    window.addEventListener('storage', checkLoginStatus);
+    // Custom event listener for same-tab sessionStorage changes
+    window.addEventListener('sessionStorageChange', checkLoginStatus);
+
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+      window.removeEventListener('sessionStorageChange', checkLoginStatus);
+    };
+  },[])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -49,7 +66,7 @@ const Navbar = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
                 <Code className="w-5 h-5 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">
+              <span className="text-2xl font-bold text-white no-underline">
                 Code<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Clash</span>
               </span>
             </Link>

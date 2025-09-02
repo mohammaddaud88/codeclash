@@ -2,16 +2,17 @@ import React from 'react';
 import './App.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Navbar from './components/Navbar';
-import HomePage from './components/Home'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import Explore from './components/Explore'
-import Problems from './components/Problems'
-import ProblemSolvePage from './components/IndivisualProblemPage';
+import HomePage from './pages/Home'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import Explore from './pages/Explore'
+import Problems from './pages/Problems'
+import ProblemSolvePage from './pages/ProblemSolvePage'
 import Topics from './components/Topics';
 import TopicPage from './components/TopicPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
+
 
 // Placeholder components for pages to be created
 const Playground = () => <div className="text-center text-white text-2xl pt-10">Playground</div>;
@@ -23,7 +24,7 @@ function App() {
     <BrowserRouter>
       <ToastContainer
         position="top-right"
-        autoClose={2000}
+        autoClose={1500}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -35,19 +36,19 @@ function App() {
       />
       <Navbar />
       <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/problems" element={<Problems />} />
-          <Route path="/problems/:problemId" element={<ProblemSolvePage />} />
-          <Route path="/topics" element={<Topics />} />
-          <Route path="/topics/:topicName" element={<TopicPage />} />
-          <Route path="/playground" element={<Playground />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/problems" element={<Problems />} />
+            <Route path="/problemsolve/:id" element={<ProblemSolvePage />} />
+            <Route path="/topics" element={<Topics />} />
+            <Route path="/topics/:topicName" element={<TopicPage />} />
+            <Route path="/playground" element={<Playground />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
       </main>
     </BrowserRouter>
   )

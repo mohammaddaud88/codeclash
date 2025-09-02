@@ -5,7 +5,8 @@ const PORT = 8000
 const authRoutes = require('./routes/authroutes')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-
+const codeRoutes = require('./routes/code')
+require('dotenv').config();
 
 // Middlewares
 app.use(express.json()); 
@@ -17,10 +18,7 @@ app.use(cookieParser())
 
 // maped routes
 app.use('/auth',authRoutes);
-
-
-
-
+app.use('/code',codeRoutes);
 
 
 

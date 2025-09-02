@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const secret = 'mdkdfjdhfkjhd@#$%&safh8840505312@!$%#^&*';
+
+const secret = process.env.secret;
 
 
 function setUser(user,expiresIn){
