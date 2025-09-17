@@ -1,9 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getProblems, getProblemById, runCode } = require('../controller/coderun')
+const  runCode  = require('../controller/coderun')
  
-router.get("/", getProblems);
-router.get("/:id", getProblemById);
-router.post("/submit/:id", runCode);
-
+router.post("/run", runCode);
 module.exports = router;

@@ -38,6 +38,7 @@ async function signUp(req, res) {
       .status(201)
       .json({ message: "User created successfully", userId: newUser._id });
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: err.message });
   }
 }
