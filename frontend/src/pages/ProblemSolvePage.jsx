@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import {useParams} from "react-router-dom";
 import {
   Play,
   Send,
@@ -25,7 +26,7 @@ const ProblemSolvePage = () => {
   const [leftPanelWidth, setLeftPanelWidth] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
   const [selectedTestCase, setSelectedTestCase] = useState(0);
-  const [currentProblemId, setCurrentProblemId] = useState(1);
+  const {id} = useParams();
   const containerRef = useRef(null);
   let editorRef = useRef(null);
 
@@ -33,8 +34,12 @@ const ProblemSolvePage = () => {
   const [results, setResults] = useState([]);
   const [showFailed, setShowFailed] = useState(false);
 
+  // console.log(problems)
+  const [currentProblemId, setCurrentProblemId] = useState(id);
   const currentProblem =
-    problems.find((p) => p.id === currentProblemId) || problems[0];
+    problems[currentProblemId-1]
+  
+    console.log(currentProblem)
 
   // Set default code based on problem and language
   React.useEffect(() => {
@@ -45,7 +50,7 @@ const ProblemSolvePage = () => {
         case "python":
           return `# Write your solution here`;
         case "java":
-          return `public class Solution {
+          return `public class Main {
     public static void main(String[] args) {
         // Write your solution here
     }
@@ -490,14 +495,14 @@ int main() {
                 onChange={(e) => setLanguage(e.target.value)}
               >
                 <option value="python">Python3</option>
-                <option value="javascript">JavaScript</option>
+                {/* <option value="javascript">JavaScript</option> */}
                 <option value="java">Java</option>
                 <option value="cpp">C++</option>
               </select>
             </div>
 
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Auto-save</span>
+              <span>Online</span>
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             </div>
           </div>

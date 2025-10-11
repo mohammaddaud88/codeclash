@@ -1,10 +1,20 @@
-# Read the number of integers
-n = int(input())
+def simple_array_sum():
+    # Read number of elements
+    n = int(input().strip())
+    
+    # Read array (only if n > 0)
+    if n > 0:
+        arr = list(map(int, input().split()))
+    else:
+        arr = []
+    
+    # Compute sum
+    result = sum(arr)
+    
+    # Print result
+    print(result)
 
-# If n is 0, sum is 0
-if n == 0:
-    print(0)
-else:
-    # Read n integers and calculate their sum
-    numbers = list(map(int, input().split()))
-    print(sum(numbers))
+
+# Run the function
+if __name__ == "__main__":
+    simple_array_sum()
