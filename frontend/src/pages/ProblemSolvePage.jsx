@@ -223,11 +223,34 @@ int main() {
   };
 
   const tabs = [
-    { id: "description", label: "Description" },
-    { id: "editorial", label: "Editorial" },
-    { id: "solutions", label: "Solutions" },
-    { id: "submissions", label: "Submissions" },
-  ];
+  { id: "description", label: "Description" },
+  { id: "ai-learn", label: "AI Learn" },
+  { id: "editorial", label: "Editorial" },
+  { id: "solutions", label: "Solutions" },
+  { id: "submissions", label: "Submissions" },
+];
+
+const [aiGuide, setAiGuide] = useState("");
+const [aiGuideLoading, setAiGuideLoading] = useState(false);
+const [aiGuideError, setAiGuideError] = useState("");
+
+  React.useEffect(() => {
+    if (activeTab === "ai-learn") {
+      setAiGuideLoading(true);
+      setAiGuideError("");
+      fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/gemini/learn/${currentProblemId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.guide) {
+            setAiGuide(data.guide);
+          } else {
+            setAiGuideError(data.message || "Failed to fetch AI guide");
+          }
+        })
+        .catch(() => setAiGuideError("Network error"))
+        .finally(() => setAiGuideLoading(false));
+    }
+  }, [activeTab, currentProblemId]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -356,7 +379,62 @@ int main() {
             </div>
           </div>
         );
-
+      case "ai-learn":
+        return (
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">AI Step-by-Step Solution Guide</h2>
+            <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+              {aiGuideLoading ? (
+                <div className="text-center text-gray-500">Generating solution guide...</div>
+              ) : aiGuideError ? (
+                <div className="text-center text-red-500">{aiGuideError}</div>
+              ) : (
+                <>
+                  {/* Render each section if present in the response */}
+                  {aiGuide && (
+                    <pre className="whitespace-pre-wrap text-gray-800 text-base">{aiGuide}</pre>
+                  )}
+                </>
+              )}
+            </div>
+            <div className="mt-4 text-sm text-gray-500 text-center">
+              <span>Includes: Problem analysis, hints, common mistakes, visual explanation, solution approach, Python code, and complexity analysis.</span>
+            </div>
+          </div>
+        );
+      case "editorial":
+        return (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-lg mb-2">Coming Soon</div>
+              <div className="text-gray-500 text-sm">
+                This section is under development
+              </div>
+            </div>
+          </div>
+        );
+      case "solutions":
+        return (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-lg mb-2">Coming Soon</div>
+              <div className="text-gray-500 text-sm">
+                This section is under development
+              </div>
+            </div>
+          </div>
+        );
+      case "submissions":
+        return (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-lg mb-2">Coming Soon</div>
+              <div className="text-gray-500 text-sm">
+                This section is under development
+              </div>
+            </div>
+          </div>
+        );
       default:
         return (
           <div className="flex items-center justify-center h-64">

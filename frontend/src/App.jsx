@@ -1,3 +1,4 @@
+import Editorial from './pages/Editorial';
 import React from 'react';
 import './App.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
@@ -41,6 +42,7 @@ function App() {
             <Route path="/explore" element={<Explore />} />
             <Route path="/problems" element={<Problems />} />
             <Route path="/problemsolve/:id" element={<ProblemSolvePage />} />
+            <Route path="/editorial/:id" element={<Editorial />} />
             <Route path="/topics" element={<Topics />} />
             <Route path="/topics/:topicName" element={<TopicPage />} />
             <Route path="/playground" element={<Playground />} />

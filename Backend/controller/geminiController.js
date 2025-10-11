@@ -1,59 +1,53 @@
-const express = require('express');
-const router = express.Router();
 const geminiModel = require('../services/gemini');
-const User = require('../models/User'); // Your Mongoose User model
 
-router.post('/generate', async (req, res) => {
+// Handler for AI Learn
+const handleLearn = async (req, res) => {
     try {
-        const { userId, contentType, details } = req.body;
-
-        // 1. Fetch user data from MongoDB
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+        const problemId = parseInt(req.params.problemId);
+        const problems = require('../assest/problems.json');
+        const problem = problems.find(p => p.id === problemId);
+        if (!problem) {
+            return res.status(404).json({ message: "Problem not found" });
         }
 
-        // 2. Craft a detailed prompt (The Magic Happens Here ✨)
-        const prompt = createPersonalizedPrompt(user, contentType, details);
+        // Prompt for Gemini API (focus on solving)
+        const prompt = `You are an expert competitive programmer and educator. Help a student solve the following coding problem step-by-step.\n\nTitle: ${problem.title}\nDescription: ${problem.description}\nConstraints: ${problem.constraints}\nInput Format: ${problem.inputFormat}\nOutput Format: ${problem.outputFormat}\nExamples: ${problem.example.map(e => `Input: ${e.input} Output: ${e.output}`).join(' | ')}\n\nYour response should include:\n1. Problem analysis and intuition\n2. Step-by-step hints to reach the solution\n3. Common mistakes to avoid\n4. Visual explanation (describe in words)\n5. Final solution approach\n6. Python code\n7. Complexity analysis`;
 
-        // 3. Call the Gemini API
+        // Call Gemini API
         const result = await geminiModel.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
-        // 4. Send the response back to the frontend
-        res.status(200).json({ content: text });
-
+        res.status(200).json({ guide: text });
     } catch (error) {
-        console.error("Error generating content:", error);
-        res.status(500).json({ message: "Failed to generate content" });
+        console.error("Error generating AI guide:", error);
+        res.status(500).json({ message: "Failed to generate AI guide" });
     }
-});
+};
 
-function createPersonalizedPrompt(user, contentType, details) {
-    // Example for generating a DSA problem
-    if (contentType === 'dsa_problem') {
-        return `
-            You are an expert problem setter for a competitive programming platform called CodeClash.AI.
-            Generate a unique DSA problem for a user with the following profile:
-            - Knowledge Level: ${user.knowledgeLevel} (e.g., Beginner, Intermediate)
-            - Preferred Language: ${user.preferredLanguage}
-            - Recent Topics Practiced: ${user.recentTopics.join(', ')}
-            - Goal: ${user.goal}
+// Handler for Editorial
+const handleEditorial = async (req, res) => {
+    try {
+        const problemId = parseInt(req.params.problemId);
+        const problems = require('../assest/problems.json');
+        const problem = problems.find(p => p.id === problemId);
+        if (!problem) {
+            return res.status(404).json({ message: "Problem not found" });
+        }
 
-            The requested problem is about: "${details.topic}".
-            The difficulty should be tailored to their knowledge level.
+        // Prompt for Gemini API
+        const prompt = `You are an expert competitive programmer. Write a detailed editorial for the following problem.\n\nTitle: ${problem.title}\nDescription: ${problem.description}\nConstraints: ${problem.constraints}\nInput Format: ${problem.inputFormat}\nOutput Format: ${problem.outputFormat}\nExamples: ${problem.example.map(e => `Input: ${e.input} Output: ${e.output}`).join(' | ')}\n\nEditorial should include: 1. Problem analysis, 2. Step-by-step solution approach, 3. Code snippets (in Python), 4. Edge cases, 5. Complexity analysis.`;
 
-            Generate the output in a clean JSON format with the following keys:
-            - "title": A creative problem title.
-            - "problemStatement": A clear and concise problem description, including a story if possible.
-            - "constraints": Technical constraints (e.g., "1 <= N <= 10^5").
-            - "exampleInput": A sample input.
-            - "exampleOutput": The corresponding sample output.
-        `;
+        // Call Gemini API
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        res.status(200).json({ editorial: text });
+    } catch (error) {
+        console.error("Error generating editorial:", error);
+        res.status(500).json({ message: "Failed to generate editorial" });
     }
-    // Add more prompt templates for other content types (e.g., explanations, roadmaps)
-    return `Generate content about ${details.topic} for a ${user.knowledgeLevel} user.`;
-}
+};
 
-module.exports = router;
+module.exports = { handleLearn, handleEditorial };

@@ -10,6 +10,8 @@ const codeRoutes = require('./routes/code')
 require('dotenv').config();
 
 // Middlewares
+const geminiRoutes = require('./routes/geminiRoute');
+app.use('/gemini', geminiRoutes);
 app.use(express.json()); 
 app.use(cors({
     origin: 'http://localhost:5173',

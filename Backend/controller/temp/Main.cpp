@@ -1,20 +1,11 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
 using namespace std;
 
 int main() {
-    int n;
-    cin >> n;  // number of elements
-    
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        cin >> arr[i];
-    }
-
-    long long sum = 0; // use long long to handle large sums
-    for (int x : arr) {
-        sum += x;
-    }
-
-    cout << sum << endl;
+    // Write your solution here
+    int n, m;
+    cin>>n>>m;
+    cout<<n+m<<endl;
     return 0;
 }

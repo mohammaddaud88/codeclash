@@ -3,8 +3,8 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ../frontend
+      dockerfile: dockerfile
     ports:
       - "3000:3000"
     depends_on:
@@ -12,12 +12,12 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
     volumes:
-      - ./backend/src:/app/src
+      - ./Backend/src:/app/src
     environment:
       - NODE_ENV=production
     command: ["node", "src/runCode.js"]
