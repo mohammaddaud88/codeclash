@@ -4,19 +4,20 @@ const app = express()
 const PORT = 8000
 const authRoutes = require('./routes/authroutes')
 const dotenv = require('dotenv').config();
-const cors = require('cors');
+// const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const codeRoutes = require('./routes/code')
 require('dotenv').config();
+const cors = require('cors');
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 // Middlewares
 const geminiRoutes = require('./routes/geminiRoute');
 app.use('/gemini', geminiRoutes);
 app.use(express.json()); 
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true 
-}))
 app.use(cookieParser())
 
 // maped routes
