@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const  runCode  = require('../controller/coderun')
-const {submitCode} = require('../controller/codeSubmit')
+const submitCode = require('../controller/codeSubmit')
 
  
 router.post("/run", runCode);

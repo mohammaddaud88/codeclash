@@ -40,4 +40,4 @@ const getSubmittedCode = async (req,res)=>{
     }
 }
 
-module.exports = {codeSubmit, getSubmittedCode };
+module.exports = codeSubmit;
