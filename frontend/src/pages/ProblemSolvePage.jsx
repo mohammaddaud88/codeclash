@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import {useParams} from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Play,
   Send,
@@ -17,7 +17,10 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
 
+const AI_GUIDE_STORAGE_KEY = "aiGuideCache";
+
 const ProblemSolvePage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("description");
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("python");
@@ -26,9 +29,12 @@ const ProblemSolvePage = () => {
   const [leftPanelWidth, setLeftPanelWidth] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
   const [selectedTestCase, setSelectedTestCase] = useState(0);
-  const {id} = useParams();
+  const [passedTestCases, setPassedTestCases] = useState(0);
+  const { id } = useParams();
   const containerRef = useRef(null);
   let editorRef = useRef(null);
+  let totalTestCases = 0;
+  const username = localStorage.getItem('email')
 
   // results: array of { index, input, expected, output, pass }
   const [results, setResults] = useState([]);
@@ -36,10 +42,9 @@ const ProblemSolvePage = () => {
 
   // console.log(problems)
   const [currentProblemId, setCurrentProblemId] = useState(id);
-  const currentProblem =
-    problems[currentProblemId-1]
-  
-    console.log(currentProblem)
+  const currentProblem = problems[currentProblemId - 1];
+
+  // console.log(currentProblem);
 
   // Set default code based on problem and language
   React.useEffect(() => {
@@ -71,9 +76,33 @@ int main() {
     setCode(getDefaultCode());
   }, [currentProblem, language]);
 
-  const handleSubmit = () => {
-    toast.info("Submission received. Processing...", { autoClose: 3000 });
-    // TODO: wire actual submission endpoint here
+  const handleSubmit = async () => {
+    try {
+      if (!localStorage.getItem("email")) {
+        toast.warning("Please Login to Continue");
+        navigate("/login");
+        return;
+      }
+      console.log(passedTestCases)
+      if (passedTestCases !== currentProblem.testCases.length) {
+        toast.warning("Please run all test cases first!", { autoClose: 2000 });
+        return;
+      }
+      const res = await fetch("http://localhost:8000/code/submit/code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+
+        },
+        body: JSON.stringify({userId:username, code, language, problemId:currentProblemId }),
+      });
+      const data = await res.json();
+      toast.success("Code submitted successfully!");
+      console.log(data);
+    } catch (e) {
+      toast.error("Error in submitting code");
+      console.log(e);
+    }
   };
 
   const handleMouseDown = (e) => {
@@ -114,6 +143,11 @@ int main() {
     setResults([]);
     setShowFailed(false);
     try {
+      if (!localStorage.getItem("email")) {
+        toast.warning("Please Login to Continue");
+        navigate("/login");
+        return;
+      }
       const tests = currentProblem.testCases || [];
       if (!tests.length) {
         setOutput("No test cases defined for this problem.");
@@ -165,32 +199,53 @@ int main() {
               ? normalize(out) === normalize(tc.expected)
               : null;
 
-          const resultObj = { index: i + 1, input: tc.input, expected: tc.expected, output: out, pass };
+          const resultObj = {
+            index: i + 1,
+            input: tc.input,
+            expected: tc.expected,
+            output: out,
+            pass,
+          };
           localResults.push(resultObj);
           // update results state progressively so UI can reflect pass/fail
           setResults((prev) => [...prev, resultObj]);
 
           const status = pass === null ? "N/A" : pass ? "PASS" : "FAIL";
           // append test result to output progressively
-          setOutput((prev) =>
-            prev +
-              `Test ${i + 1} [${status}]\nInput:\n${tc.input}\nExpected:\n${tc.expected ?? "—"}\nOutput:\n${out}\n\n-----------------\n\n`
+          setOutput(
+            (prev) =>
+              prev +
+              `Test ${i + 1} [${status}]\nInput:\n${tc.input}\nExpected:\n${
+                tc.expected ?? "—"
+              }\nOutput:\n${out}\n\n-----------------\n\n`
           );
         } catch (e) {
           const data = { output: `Network error: ${e.message}` };
           const out = data.output;
-          const resultObj = { index: i + 1, input: tc.input, expected: tc.expected, output: out, pass: false };
+          const resultObj = {
+            index: i + 1,
+            input: tc.input,
+            expected: tc.expected,
+            output: out,
+            pass: false,
+          };
           localResults.push(resultObj);
           setResults((prev) => [...prev, resultObj]);
-          setOutput((prev) =>
-            prev +
-              `Test ${i + 1} [FAIL]\nInput:\n${tc.input}\nExpected:\n${tc.expected ?? "—"}\nOutput:\n${out}\n\n-----------------\n\n`
+          setOutput(
+            (prev) =>
+              prev +
+              `Test ${i + 1} [FAIL]\nInput:\n${tc.input}\nExpected:\n${
+                tc.expected ?? "—"
+              }\nOutput:\n${out}\n\n-----------------\n\n`
           );
         }
       }
 
       const total = localResults.length;
       const passed = localResults.filter((r) => r.pass === true).length;
+      totalTestCases = total;
+      setPassedTestCases(passed);
+
       if (passed === total) {
         toast.success("All test cases passed ✅", { autoClose: 3000 });
       } else if (passed === 0) {
@@ -198,7 +253,9 @@ int main() {
         // show failed button automatically
         setShowFailed(true);
       } else {
-        toast.warn(`${passed}/${total} test cases passed ⚠️`, { autoClose: 3500 });
+        toast.warn(`${passed}/${total} test cases passed ⚠️`, {
+          autoClose: 3500,
+        });
         setShowFailed(true);
       }
     } catch (err) {
@@ -223,34 +280,89 @@ int main() {
   };
 
   const tabs = [
-  { id: "description", label: "Description" },
-  { id: "ai-learn", label: "AI Learn" },
-  { id: "editorial", label: "Editorial" },
-  { id: "solutions", label: "Solutions" },
-  { id: "submissions", label: "Submissions" },
-];
+    { id: "description", label: "Description" },
+    { id: "ai-learn", label: "AI Learn" },
+    { id: "editorial", label: "Editorial" },
+    { id: "solutions", label: "Solutions" },
+    { id: "submissions", label: "Submissions" },
+  ];
 
-const [aiGuide, setAiGuide] = useState("");
-const [aiGuideLoading, setAiGuideLoading] = useState(false);
-const [aiGuideError, setAiGuideError] = useState("");
-
-  React.useEffect(() => {
-    if (activeTab === "ai-learn") {
-      setAiGuideLoading(true);
-      setAiGuideError("");
-      fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/gemini/learn/${currentProblemId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.guide) {
-            setAiGuide(data.guide);
-          } else {
-            setAiGuideError(data.message || "Failed to fetch AI guide");
-          }
-        })
-        .catch(() => setAiGuideError("Network error"))
-        .finally(() => setAiGuideLoading(false));
+  const [aiGuide, setAiGuide] = useState(() => {
+    const cache = JSON.parse(
+      localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
+    );
+    const now = Date.now();
+    if (cache[id] && cache[id].expire && cache[id].expire > now) {
+      return cache[id].guide;
     }
-  }, [activeTab, currentProblemId]);
+    return "";
+  });
+  const [aiGuideLoading, setAiGuideLoading] = useState(false);
+  const [aiGuideError, setAiGuideError] = useState("");
+  const [aiCode, setAiCode] = useState("");
+  const [aiCodeLoading, setAiCodeLoading] = useState(false);
+  const [codeLanguageForAI, setCodeLanguageForAI] = useState("python");
+
+  const fetchAiCode = React.useCallback(() => {
+    setAiCodeLoading(true);
+    setAiCode("");
+    fetch(
+      `${
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      }/gemini/code/${currentProblemId}?lang=${codeLanguageForAI}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code) {
+          setAiCode(data.code);
+        } else {
+          setAiCode("// Failed to fetch code solution");
+        }
+      })
+      .catch(() => setAiCode("// Network error"))
+      .finally(() => setAiCodeLoading(false));
+  }, [currentProblemId, codeLanguageForAI]);
+
+  const saveAiGuide = (problemId, guide) => {
+    const cache = JSON.parse(
+      localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
+    );
+    const now = Date.now();
+    const expireTime = now + 24 * 60 * 60 * 1000; // 24 hours
+    cache[problemId] = { guide, expire: expireTime };
+    localStorage.setItem(AI_GUIDE_STORAGE_KEY, JSON.stringify(cache));
+  };
+
+  const handleGenerateAiGuide = () => {
+    setAiGuideLoading(true);
+    setAiGuideError("");
+    fetch(
+      `${
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      }/gemini/learn/${currentProblemId}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.guide) {
+          setAiGuide(data.guide);
+          saveAiGuide(currentProblemId, data.guide);
+        } else {
+          setAiGuideError(data.message || "Failed to fetch AI guide");
+        }
+      })
+      .catch(() => setAiGuideError("Network error"))
+      .finally(() => setAiGuideLoading(false));
+  };
+
+  // When switching problems, load from cache if available
+  React.useEffect(() => {
+    const cache = JSON.parse(
+      localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
+    );
+    setAiGuide(cache[currentProblemId] || "");
+    setAiGuideError("");
+    setAiGuideLoading(false);
+  }, [currentProblemId]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -381,24 +493,286 @@ const [aiGuideError, setAiGuideError] = useState("");
         );
       case "ai-learn":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">AI Step-by-Step Solution Guide</h2>
-            <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-              {aiGuideLoading ? (
-                <div className="text-center text-gray-500">Generating solution guide...</div>
-              ) : aiGuideError ? (
-                <div className="text-center text-red-500">{aiGuideError}</div>
-              ) : (
-                <>
-                  {/* Render each section if present in the response */}
-                  {aiGuide && (
-                    <pre className="whitespace-pre-wrap text-gray-800 text-base">{aiGuide}</pre>
+          <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  AI Step-by-Step Solution Guide
+                </h2>
+                <p className="text-gray-600">
+                  Master this problem with intelligent guidance
+                </p>
+              </div>
+
+              {/* Show button if no guide, else show guide */}
+              {!aiGuide && !aiGuideLoading && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <button
+                    onClick={handleGenerateAiGuide}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
+                    disabled={aiGuideLoading}
+                  >
+                    {aiGuideLoading ? "Generating..." : "Generate AI Guide"}
+                  </button>
+                  {aiGuideError && (
+                    <div className="text-red-600 mt-4">{aiGuideError}</div>
                   )}
+                </div>
+              )}
+
+              {aiGuideLoading && (
+                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto"></div>
+                  </div>
+                  <p className="text-gray-500 mt-6">
+                    Generating personalized solution guide...
+                  </p>
+                </div>
+              )}
+
+              {aiGuide && !aiGuideLoading && (
+                <>
+                  {/* Render your guide as before */}
+                  <div className="space-y-6">
+                    {aiGuide &&
+                      aiGuide.split(/(?=###\s)/).map((section, idx) => {
+                        const lines = section.trim().split("\n");
+                        const titleMatch =
+                          lines[0]?.match(/^###\s+\d+\.\s+(.+)/);
+                        const title = titleMatch ? titleMatch[1] : null;
+                        const content = title
+                          ? lines.slice(1).join("\n").trim()
+                          : section.trim();
+
+                        if (!title) {
+                          return (
+                            <div
+                              key={idx}
+                              className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500"
+                            >
+                              <div className="prose prose-sm max-w-none">
+                                <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed font-sans">
+                                  {content}
+                                </pre>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        const getIconAndColor = (title) => {
+                          if (
+                            title.includes("Analysis") ||
+                            title.includes("Intuition")
+                          ) {
+                            return {
+                              icon: "🎯",
+                              color: "blue",
+                              bg: "bg-blue-50",
+                              border: "border-blue-500",
+                            };
+                          }
+                          if (title.includes("Hints")) {
+                            return {
+                              icon: "💡",
+                              color: "yellow",
+                              bg: "bg-yellow-50",
+                              border: "border-yellow-500",
+                            };
+                          }
+                          if (title.includes("Mistakes")) {
+                            return {
+                              icon: "⚠️",
+                              color: "red",
+                              bg: "bg-red-50",
+                              border: "border-red-500",
+                            };
+                          }
+                          if (title.includes("Visual")) {
+                            return {
+                              icon: "🎨",
+                              color: "purple",
+                              bg: "bg-purple-50",
+                              border: "border-purple-500",
+                            };
+                          }
+                          if (
+                            title.includes("Solution") ||
+                            title.includes("Approach")
+                          ) {
+                            return {
+                              icon: "✅",
+                              color: "green",
+                              bg: "bg-green-50",
+                              border: "border-green-500",
+                            };
+                          }
+                          if (title.includes("Code")) {
+                            return {
+                              icon: "💻",
+                              color: "indigo",
+                              bg: "bg-indigo-50",
+                              border: "border-indigo-500",
+                            };
+                          }
+                          if (title.includes("Complexity")) {
+                            return {
+                              icon: "⚡",
+                              color: "orange",
+                              bg: "bg-orange-50",
+                              border: "border-orange-500",
+                            };
+                          }
+                          return {
+                            icon: "📝",
+                            color: "gray",
+                            bg: "bg-gray-50",
+                            border: "border-gray-500",
+                          };
+                        };
+
+                        const { icon, bg, border } = getIconAndColor(title);
+
+                        return (
+                          <div
+                            key={idx}
+                            className={`bg-white rounded-xl shadow-md overflow-hidden border-l-4 ${border}`}
+                          >
+                            <div
+                              className={`${bg} px-6 py-4 border-b border-gray-200`}
+                            >
+                              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                                <span className="text-2xl">{icon}</span>
+                                {title}
+                              </h3>
+                            </div>
+                            <div className="p-6">
+                              <div className="prose prose-sm max-w-none">
+                                {content.split("```").map((block, blockIdx) => {
+                                  if (blockIdx % 2 === 1) {
+                                    const [lang, ...codeLines] =
+                                      block.split("\n");
+                                    const code = codeLines.join("\n").trim();
+                                    return (
+                                      <div key={blockIdx} className="my-4">
+                                        <div className="bg-gray-900 rounded-t-lg px-4 py-2 flex items-center justify-between">
+                                          <span className="text-xs font-mono text-gray-400">
+                                            {lang || "code"}
+                                          </span>
+                                          <button
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(
+                                                code
+                                              );
+                                              toast.info("Code copied!", {
+                                                autoClose: 1000,
+                                              });
+                                            }}
+                                            className="text-xs text-gray-400 hover:text-white transition-colors"
+                                          >
+                                            Copy
+                                          </button>
+                                        </div>
+                                        <pre className="bg-gray-900 text-gray-100 p-4 rounded-b-lg overflow-x-auto">
+                                          <code className="text-sm font-mono">
+                                            {code}
+                                          </code>
+                                        </pre>
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <div
+                                      key={blockIdx}
+                                      className="whitespace-pre-wrap text-gray-700 leading-relaxed"
+                                    >
+                                      {block
+                                        .split("\n")
+                                        .map((line, lineIdx) => {
+                                          if (
+                                            line.trim().startsWith("*   ") ||
+                                            line.trim().startsWith("- ")
+                                          ) {
+                                            return (
+                                              <div
+                                                key={lineIdx}
+                                                className="flex gap-2 my-2"
+                                              >
+                                                <span className="text-blue-500 font-bold">
+                                                  •
+                                                </span>
+                                                <span>
+                                                  {line.replace(
+                                                    /^[\s]*[\*\-]\s+/,
+                                                    ""
+                                                  )}
+                                                </span>
+                                              </div>
+                                            );
+                                          }
+                                          if (
+                                            line.trim().startsWith("**") &&
+                                            line.trim().endsWith("**")
+                                          ) {
+                                            return (
+                                              <div
+                                                key={lineIdx}
+                                                className="font-bold text-gray-900 mt-4 mb-2"
+                                              >
+                                                {line.replace(/\*\*/g, "")}
+                                              </div>
+                                            );
+                                          }
+                                          return (
+                                            line && (
+                                              <div
+                                                key={lineIdx}
+                                                className="my-1"
+                                              >
+                                                {line}
+                                              </div>
+                                            )
+                                          );
+                                        })}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                  <div className="flex justify-center mt-8">
+                    <button
+                      onClick={handleGenerateAiGuide}
+                      className="px-5 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium"
+                      disabled={aiGuideLoading}
+                    >
+                      Generate Again
+                    </button>
+                  </div>
                 </>
               )}
-            </div>
-            <div className="mt-4 text-sm text-gray-500 text-center">
-              <span>Includes: Problem analysis, hints, common mistakes, visual explanation, solution approach, Python code, and complexity analysis.</span>
+
+              <div className="mt-8 bg-white rounded-xl shadow-md p-6 border border-gray-200">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      What's Included
+                    </h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      This AI-generated guide includes problem analysis,
+                      step-by-step hints, common mistakes to avoid, visual
+                      explanations, solution approach, complete Python code, and
+                      complexity analysis to help you master this problem.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -553,7 +927,9 @@ const [aiGuideError, setAiGuideError] = useState("");
           </div>
 
           {/* Tab Content -> left side scrollable */}
-          <div className="flex-1 overflow-y-auto min-h-0">{renderTabContent()}</div>
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {renderTabContent()}
+          </div>
         </div>
 
         {/* Resize Handle */}
@@ -590,8 +966,21 @@ const [aiGuideError, setAiGuideError] = useState("");
             {/* Editor toolbar */}
             <div className="flex items-center justify-between gap-3 px-3 py-2 bg-gray-900 text-gray-100 border-b border-gray-800">
               <div className="flex items-center gap-3">
-                <div className="text-xs font-semibold text-gray-300">Solution</div>
-                <div className="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded">main.{language === 'python' ? 'py' : language === 'javascript' ? 'js' : language === 'java' ? 'java' : language === 'cpp' ? 'cpp' : 'txt'}</div>
+                <div className="text-xs font-semibold text-gray-300">
+                  Solution
+                </div>
+                <div className="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded">
+                  main.
+                  {language === "python"
+                    ? "py"
+                    : language === "javascript"
+                    ? "js"
+                    : language === "java"
+                    ? "java"
+                    : language === "cpp"
+                    ? "cpp"
+                    : "txt"}
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
@@ -611,7 +1000,9 @@ const [aiGuideError, setAiGuideError] = useState("");
                     // format document if available
                     if (editorRef?.current) {
                       try {
-                        editorRef.current.getAction("editor.action.formatDocument")?.run();
+                        editorRef.current
+                          .getAction("editor.action.formatDocument")
+                          ?.run();
                       } catch (_) {}
                     }
                   }}
@@ -622,7 +1013,8 @@ const [aiGuideError, setAiGuideError] = useState("");
 
                 <button
                   onClick={() => {
-                    if (navigator.clipboard) navigator.clipboard.writeText(code);
+                    if (navigator.clipboard)
+                      navigator.clipboard.writeText(code);
                     toast.info("Copied code to clipboard", { autoClose: 1200 });
                   }}
                   className="text-xs bg-gray-800 text-gray-200 px-3 py-1 rounded hover:bg-gray-700"
@@ -632,11 +1024,21 @@ const [aiGuideError, setAiGuideError] = useState("");
 
                 <button
                   onClick={() => {
-                    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+                    const blob = new Blob([code], {
+                      type: "text/plain;charset=utf-8",
+                    });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = `solution.${language === 'python' ? 'py' : language === 'javascript' ? 'js' : language === 'java' ? 'java' : 'cpp'}`;
+                    a.download = `solution.${
+                      language === "python"
+                        ? "py"
+                        : language === "javascript"
+                        ? "js"
+                        : language === "java"
+                        ? "java"
+                        : "cpp"
+                    }`;
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
@@ -714,7 +1116,8 @@ const [aiGuideError, setAiGuideError] = useState("");
                       onClick={() => setShowFailed((s) => !s)}
                       className="ml-2 px-3 py-1 text-xs rounded-md font-medium bg-red-50 text-red-700 hover:bg-red-100"
                     >
-                      Show Failed ({results.filter((r) => r.pass === false).length})
+                      Show Failed (
+                      {results.filter((r) => r.pass === false).length})
                     </button>
                   )}
                 </div>
@@ -725,7 +1128,15 @@ const [aiGuideError, setAiGuideError] = useState("");
                   <div className="text-xs font-semibold text-gray-600 mb-2">
                     Input:
                   </div>
-                  <div className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${results[selectedTestCase]?.pass === true ? 'border-green-500' : results[selectedTestCase]?.pass === false ? 'border-red-500' : 'border-gray-800'}`}>
+                  <div
+                    className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${
+                      results[selectedTestCase]?.pass === true
+                        ? "border-green-500"
+                        : results[selectedTestCase]?.pass === false
+                        ? "border-red-500"
+                        : "border-gray-800"
+                    }`}
+                  >
                     {currentProblem.testCases[selectedTestCase]?.input}
                   </div>
                 </div>
@@ -733,7 +1144,15 @@ const [aiGuideError, setAiGuideError] = useState("");
                   <div className="text-xs font-semibold text-gray-600 mb-2">
                     Expected:
                   </div>
-                  <div className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${results[selectedTestCase]?.pass === true ? 'border-green-500' : results[selectedTestCase]?.pass === false ? 'border-red-500' : 'border-gray-800'}`}>
+                  <div
+                    className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${
+                      results[selectedTestCase]?.pass === true
+                        ? "border-green-500"
+                        : results[selectedTestCase]?.pass === false
+                        ? "border-red-500"
+                        : "border-gray-800"
+                    }`}
+                  >
                     {currentProblem.testCases[selectedTestCase]?.expected}
                   </div>
                 </div>
@@ -754,7 +1173,9 @@ const [aiGuideError, setAiGuideError] = useState("");
                 </div>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {results.filter((r) => r.pass === false).length === 0 ? (
-                    <div className="text-sm text-gray-500">No failed cases.</div>
+                    <div className="text-sm text-gray-500">
+                      No failed cases.
+                    </div>
                   ) : (
                     results
                       .map((r, idx) => ({ r, idx }))

@@ -1,4 +1,5 @@
 # Write your solution here
-n = int(input())
-m = int(input())
-print(n+m)
+# If input is on separate lines
+a = int(input())
+b = int(input())
+print(a + b)

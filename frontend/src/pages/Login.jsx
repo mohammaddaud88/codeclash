@@ -41,6 +41,7 @@ const LoginPageSideBySide = () => {
         throw new Error('Something went wrong while login');
       }
 
+      localStorage.setItem('email',formData.email);
       const resp = res.json();
       sessionStorage.setItem('isLoggedIn',true);
       toast.success(resp.message);
