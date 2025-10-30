@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Code, Mail, Lock, ArrowRight, Github, Chrome, Zap, Users, Trophy } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,13 @@ const LoginPageSideBySide = () => {
 
   const navigate = useNavigate();
 
+  useEffect(()=>{
+    const email = localStorage.getItem('email')
+    if(email){
+      navigate('/');
+      return;
+    }
+  })
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({

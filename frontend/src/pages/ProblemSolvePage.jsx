@@ -144,7 +144,7 @@ int main() {
     setShowFailed(false);
     try {
       if (!localStorage.getItem("email")) {
-        toast.warning("Please Login to Continue");
+        toast.warning("Please Login to Continue",{autoClose:2000});
         navigate("/login");
         return;
       }

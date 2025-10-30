@@ -11,6 +11,7 @@ import Problems from './pages/Problems'
 import ProblemSolvePage from './pages/ProblemSolvePage'
 import Topics from './components/Topics';
 import TopicPage from './components/TopicPage';
+import ProfilePage from './pages/Profile';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -18,7 +19,6 @@ import 'react-toastify/dist/ReactToastify.css'
 // Placeholder components for pages to be created
 const Playground = () => <div className="text-center text-white text-2xl pt-10">Playground</div>;
 const Leaderboard = () => <div className="text-center text-white text-2xl pt-10">Leaderboard</div>;
-const Profile = () => <div className="text-center text-white text-2xl pt-10">Profile</div>;
 
 function App() {
   return (
@@ -47,7 +47,7 @@ function App() {
             <Route path="/topics/:topicName" element={<TopicPage />} />
             <Route path="/playground" element={<Playground />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
           </Routes>

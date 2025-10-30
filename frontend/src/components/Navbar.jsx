@@ -7,7 +7,7 @@ const Navbar = () => {
   const [isLoggedIn,setIsLoggedIn] = useState(false);
   useEffect(()=>{
     const checkLoginStatus = () => {
-      const loginStatus = sessionStorage.getItem('isLoggedIn') ? true : false;
+      const loginStatus =  localStorage.getItem('email') ? true : false;
       setIsLoggedIn(loginStatus);
     };
 
@@ -21,7 +21,7 @@ const Navbar = () => {
       window.removeEventListener('storage', checkLoginStatus);
       window.removeEventListener('sessionStorageChange', checkLoginStatus);
     };
-  },[])
+  },[isLoggedIn])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -30,6 +30,7 @@ const Navbar = () => {
   const logout = async () => {
     try {
       // Call your logout API endpoint
+      localStorage.removeItem('email')
       const response = await fetch('http://localhost:8000/auth/logout', {
         method: 'POST',
         credentials: 'include', // Include cookies

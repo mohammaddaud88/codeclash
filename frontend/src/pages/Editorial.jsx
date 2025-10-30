@@ -39,7 +39,7 @@ const Editorial = () => {
 				</h2>
 				<div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
 					{loading ? (
-						<div className="text-center text-gray-500">Loading editorial...</div>
+						<div className="text-center text-gray-500">Thinking...</div>
 					) : error ? (
 						<div className="text-center text-red-500">{error}</div>
 					) : (
