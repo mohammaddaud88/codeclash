@@ -15,6 +15,7 @@ import ProfilePage from './pages/Profile';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import Submission from './pages/Submission';
+import ChatBot from './components/Chatbot/chatbot';
 
 
 // Placeholder components for pages to be created
@@ -52,6 +53,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path='/submission' element={<Submission/>}/>
+            <Route path='/chatbot' element={<ChatBot/>}/>
           </Routes>
       </main>
     </BrowserRouter>
