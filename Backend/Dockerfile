@@ -1,19 +1,20 @@
-FROM node:14
+# Base image
+FROM node:20-alpine
 
-# Set the working directory
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy all backend source code
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Expose port
+EXPOSE 8000
 
-# Command to run the application
-CMD ["node", "src/runCode.js"]
+# Start the server
+CMD ["npm", "run", "dev"]

@@ -17,6 +17,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
 import Submission from "./Submission";
+import ChatBot from "../components/Chatbot/chatbot";
 
 const AI_GUIDE_STORAGE_KEY = "aiGuideCache";
 
@@ -288,16 +289,17 @@ int main() {
     { id: "submissions", label: "Submissions" },
   ];
 
+  const [showChat, setShowChat] = useState(false);
   const [aiGuide, setAiGuide] = useState(() => {
-    const cache = JSON.parse(
-      localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
-    );
-    const now = Date.now();
-    if (cache[id] && cache[id].expire && cache[id].expire > now) {
-      return cache[id].guide;
-    }
-    return "";
-  });
+  const cache = JSON.parse(
+    localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
+  );
+  const now = Date.now();
+  if (cache[id] && cache[id].expire && cache[id].expire > now) {
+    return cache[id].guide;
+  }
+  return "";
+});
   const [aiGuideLoading, setAiGuideLoading] = useState(false);
   const [aiGuideError, setAiGuideError] = useState("");
   const [aiCode, setAiCode] = useState("");
@@ -1234,6 +1236,67 @@ int main() {
             </div>
           </div>
         </div>
+      </div>
+      {/* Floating Chat Bubble and ChatBot */}
+      <div style={{ position: "fixed", zIndex: 50, bottom: 24, right: 24 }}>
+        {/* Floating Chat Bubble Button */}
+        <button
+          aria-label={showChat ? "Close Chat" : "Open Chat"}
+          onClick={() => setShowChat((s) => !s)}
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: "#2563eb",
+            boxShadow: "0 4px 24px 0 rgba(0,0,0,0.14)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            fontSize: 32,
+            border: "none",
+            cursor: "pointer",
+            marginBottom: showChat ? 16 : 0,
+            transition: "background 0.2s",
+          }}
+          className="hover:bg-blue-700 focus:outline-none"
+        >
+          {showChat ? (
+            <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+              <path d="M6 6l8 8M14 6l-8 8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            // Chat bubble icon
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M21 14.5a2.5 2.5 0 01-2.5 2.5H7.414a1 1 0 00-.707.293l-2.707 2.707A1 1 0 013 18.586V5.5A2.5 2.5 0 015.5 3h13A2.5 2.5 0 0121 5.5v9z" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+            </svg>
+          )}
+        </button>
+        {/* ChatBot Panel */}
+        {showChat && (
+          <div
+            style={{
+              position: "fixed",
+              right: 24,
+              bottom: 100,
+              zIndex: 50,
+              width: 360,
+              maxWidth: "95vw",
+              boxShadow: "0 8px 32px 0 rgba(30,41,59,0.25)",
+              borderRadius: 14,
+              background: "white",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+            className="shadow-2xl border border-gray-200"
+          >
+            <ChatBot 
+              problemId={id} 
+              problemData = {currentProblem}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

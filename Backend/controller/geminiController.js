@@ -1,4 +1,95 @@
 const geminiModel = require('../services/gemini');
+const Question = require("../models/questionModel");   // adjust if your model name differs
+const Submission = require("../models/submissionModel"); // adjust if different
+const axios = require('axios');
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+// Helper function to build context dynamically from MongoDB
+async function buildContext(message) {
+    let context = "";
+
+    const problemMatch = message.match(/problem\s*(\d+)/i);
+    if (problemMatch) {
+        const problemID = parseInt(problemMatch[1]);
+        const question = await Question.findOne({ questionID: problemID });
+
+        if (question) {
+            context += `Problem ${problemID}: ${question.title}\n`;
+            context += `Description: ${question.description}\n`;
+            if (question.inputFormat) context += `Input Format: ${question.inputFormat}\n`;
+            if (question.outputFormat) context += `Output Format: ${question.outputFormat}\n`;
+            if (question.example) context += `Example: ${question.example}\n`;
+        }
+    }
+
+    const submissionMatch = message.match(/my\s*code|submission/i);
+    if (submissionMatch) {
+        const submission = await Submission.findOne().sort({ _id: -1 });
+        if (submission) {
+            context += `\nUser's last submission for Problem ${submission.problemID}:\nLanguage: ${submission.language}\nCode:\n${submission.code}\n`;
+        }
+    }
+
+    return context;
+}
+
+exports.chatWithGemini = async (req, res) => {
+    console.log("🔍 Incoming body:", req.body);
+
+    const { message, problemId } = req.body;
+    if (!message) return res.status(400).json({ error: "Message required" });
+
+    try {
+        // --- Build context dynamically ---
+        let context = "";
+
+        // If problem ID is sent, fetch problem details
+        if (problemId) {
+            const question = await Question.findOne({ questionID: problemId });
+            if (problemId && !question) {
+                context = `The user is working on Problem ${problemId} but it was not found in the database. The question they asked is: ${message}`;
+            }
+            if (question) {
+                context += `
+You are helping the user solve this coding problem:
+
+Title: ${question.title}
+Description: ${question.description}
+Input Format: ${question.inputFormat}
+Output Format: ${question.outputFormat}
+Example: ${question.example}
+
+Now, the user is asking: ${message}
+        `;
+            }
+        } else {
+            context = `The user is asking a general coding question: ${message}`;
+        }
+
+        const response = await axios.post(
+            "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent",
+            {
+                contents: [{ parts: [{ text: context }] }],
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": GEMINI_API_KEY,
+                },
+            }
+        );
+
+        const reply = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+        res.json({ reply });
+    } catch (error) {
+        console.error("🔥 Gemini API error:", error.response?.data || error.message);
+        res.status(500).json({
+            error: "Gemini API Error",
+            details: error.response?.data || error.message,
+        });
+    }
+};
 
 // Handler for AI Learn
 const handleLearn = async (req, res) => {
@@ -50,4 +141,8 @@ const handleEditorial = async (req, res) => {
     }
 };
 
-module.exports = { handleLearn, handleEditorial };
+module.exports = {
+    chatWithGemini: exports.chatWithGemini,
+    handleLearn,
+    handleEditorial
+};
