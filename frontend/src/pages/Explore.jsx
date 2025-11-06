@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Search, Filter, TrendingUp, Star, Clock, Users, Trophy, 
+import {
+  Search, Filter, TrendingUp, Star, Clock, Users, Trophy,
   Code, Zap, BookOpen, Target, Play, ArrowRight, Flame,
   Calendar, Award, ChevronRight, Eye, Heart, MessageSquare,
   Brain, Lightbulb, Globe, Rocket
@@ -11,44 +11,44 @@ const ExplorePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Sample data - replace with real API calls
-  const featuredProblems = [
-    {
-      id: 1,
-      title: "Two Sum",
-      difficulty: "Easy",
-      category: "Arrays",
-      company: "Meta",
-      solvers: 1240,
-      likes: 892,
-      description: "Find two numbers that add up to target",
-      languages: ["Python", "Java", "C++"],
-      estimatedTime: "15 min"
-    },
-    {
-      id: 2,
-      title: "Binary Tree Traversal",
-      difficulty: "Medium", 
-      category: "Trees",
-      company: "Google",
-      solvers: 756,
-      likes: 643,
-      description: "Implement inorder, preorder, and postorder traversal",
-      languages: ["Java", "Python", "JavaScript"],
-      estimatedTime: "30 min"
-    },
-    {
-      id: 3,
-      title: "Dynamic Programming - Knapsack",
-      difficulty: "Hard",
-      category: "Dynamic Programming",
-      company: "Amazon",
-      solvers: 342,
-      likes: 298,
-      description: "Solve the classic 0/1 knapsack problem",
-      languages: ["C++", "Java", "Python"],
-      estimatedTime: "45 min"
-    }
-  ];
+  // const featuredProblems = [
+  //   {
+  //     id: 1,
+  //     title: "Two Sum",
+  //     difficulty: "Easy",
+  //     category: "Arrays",
+  //     company: "Meta",
+  //     solvers: 1240,
+  //     likes: 892,
+  //     description: "Find two numbers that add up to target",
+  //     languages: ["Python", "Java", "C++"],
+  //     estimatedTime: "15 min"
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Binary Tree Traversal",
+  //     difficulty: "Medium", 
+  //     category: "Trees",
+  //     company: "Google",
+  //     solvers: 756,
+  //     likes: 643,
+  //     description: "Implement inorder, preorder, and postorder traversal",
+  //     languages: ["Java", "Python", "JavaScript"],
+  //     estimatedTime: "30 min"
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Dynamic Programming - Knapsack",
+  //     difficulty: "Hard",
+  //     category: "Dynamic Programming",
+  //     company: "Amazon",
+  //     solvers: 342,
+  //     likes: 298,
+  //     description: "Solve the classic 0/1 knapsack problem",
+  //     languages: ["C++", "Java", "Python"],
+  //     estimatedTime: "45 min"
+  //   }
+  // ];
 
   const categories = [
     { name: "Arrays", icon: "🔢", count: 234, color: "from-blue-400 to-blue-600" },
@@ -72,7 +72,7 @@ const ExplorePage = () => {
       id: 2,
       title: "Biweekly Contest 45",
       startTime: "2024-12-18T15:00:00Z",
-      duration: "90 minutes", 
+      duration: "90 minutes",
       participants: 856,
       status: "upcoming"
     }
@@ -95,7 +95,7 @@ const ExplorePage = () => {
       description: "Learn common algorithmic patterns and techniques",
       progress: 0,
       problems: 67,
-      duration: "8 weeks", 
+      duration: "8 weeks",
       level: "Intermediate",
       icon: Brain
     },
@@ -170,11 +170,10 @@ const ExplorePage = () => {
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-all duration-200 ${
-                  activeTab === id
+                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-all duration-200 ${activeTab === id
                     ? 'border-cyan-400 text-cyan-400'
                     : 'border-transparent text-slate-400 hover:text-slate-300'
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-medium">{label}</span>
@@ -184,68 +183,9 @@ const ExplorePage = () => {
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Discover Tab */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {activeTab === 'discover' && (
           <div className="space-y-12">
-            {/* Featured Problems */}
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white flex items-center space-x-2">
-                  <Flame className="w-6 h-6 text-orange-500" />
-                  <span>Featured Problems</span>
-                </h2>
-                <button className="text-cyan-400 hover:text-cyan-300 flex items-center space-x-1">
-                  <span>View All</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredProblems.map((problem) => (
-                  <div key={problem.id} className="bg-slate-900 rounded-2xl border border-slate-700 hover:border-slate-600 p-6 transition-all duration-300 hover:transform hover:-translate-y-1">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(problem.difficulty)}`}>
-                        {problem.difficulty}
-                      </span>
-                      <div className="flex items-center space-x-2 text-slate-400 text-sm">
-                        <Heart className="w-4 h-4" />
-                        <span>{problem.likes}</span>
-                      </div>
-                    </div>
-
-                    <h3 className="text-lg font-semibold text-white mb-2">{problem.title}</h3>
-                    <p className="text-slate-400 text-sm mb-4">{problem.description}</p>
-
-                    <div className="flex items-center space-x-4 text-xs text-slate-500 mb-4">
-                      <span className="flex items-center space-x-1">
-                        <Users className="w-3 h-3" />
-                        <span>{problem.solvers} solved</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{problem.estimatedTime}</span>
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex space-x-2">
-                        {problem.languages.slice(0, 3).map((lang, i) => (
-                          <span key={i} className="px-2 py-1 bg-slate-800 rounded text-xs text-slate-300">
-                            {lang}
-                          </span>
-                        ))}
-                      </div>
-                      <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
-                        Solve
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             {/* Problem Categories */}
             <section>
               <h2 className="text-2xl font-bold text-white mb-6">Browse by Category</h2>
@@ -319,7 +259,7 @@ const ExplorePage = () => {
                           <span className="text-xs text-slate-400">{path.progress}%</span>
                         </div>
                         <div className="w-full bg-slate-700 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${path.progress}%` }}
                           ></div>
@@ -420,11 +360,10 @@ const ExplorePage = () => {
                     ].map((user) => (
                       <div key={user.rank} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
                         <div className="flex items-center space-x-3">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            user.rank === 1 ? 'bg-yellow-500 text-black' :
-                            user.rank === 2 ? 'bg-gray-400 text-black' :
-                            user.rank === 3 ? 'bg-amber-600 text-white' : 'bg-slate-600 text-white'
-                          }`}>
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${user.rank === 1 ? 'bg-yellow-500 text-black' :
+                              user.rank === 2 ? 'bg-gray-400 text-black' :
+                                user.rank === 3 ? 'bg-amber-600 text-white' : 'bg-slate-600 text-white'
+                            }`}>
                             {user.rank}
                           </span>
                           <span className="text-white font-medium">{user.name}</span>
@@ -567,15 +506,14 @@ const ExplorePage = () => {
                   <div key={index} className="bg-slate-900 rounded-2xl border border-slate-700 hover:border-slate-600 p-6 transition-all duration-200">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-white">{group.name}</h3>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        group.activity === 'Very Active' ? 'bg-green-400/10 text-green-400' :
-                        group.activity === 'Active' ? 'bg-yellow-400/10 text-yellow-400' :
-                        'bg-slate-400/10 text-slate-400'
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${group.activity === 'Very Active' ? 'bg-green-400/10 text-green-400' :
+                          group.activity === 'Active' ? 'bg-yellow-400/10 text-yellow-400' :
+                            'bg-slate-400/10 text-slate-400'
+                        }`}>
                         {group.activity}
                       </span>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm text-slate-400 mb-4">
                       <div className="flex items-center justify-between">
                         <span>Members:</span>
@@ -590,7 +528,7 @@ const ExplorePage = () => {
                         <span className="text-cyan-400">{group.nextSession}</span>
                       </div>
                     </div>
-                    
+
                     <button className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200">
                       Join Group
                     </button>

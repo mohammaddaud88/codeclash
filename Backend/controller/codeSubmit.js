@@ -3,7 +3,7 @@ const codeSubmitSchema = require('../models/codeSubmitSchema')
 
 const codeSubmit = async (req,res)=>{
     try{
-        const {problemId,userId,code,language} = req.body;
+        const {problemId,userId,code,language, status} = req.body;
         if(!problemId || !userId || !code || !language){
             return res.status(400).json({message:"All the fields are required"})
         }
@@ -11,7 +11,8 @@ const codeSubmit = async (req,res)=>{
             problemId,
             userId,
             code,
-            language
+            language,
+            status,
         })
 
         submitData.save();

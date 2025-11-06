@@ -49,7 +49,7 @@ const Navbar = () => {
 
   // Filter nav links based on login status
   const navLinks = [
-    { href: '/explore', label: 'Explore', icon: LayoutDashboard },
+    // { href: '/explore', label: 'Explore', icon: LayoutDashboard },
     { href: '/problems', label: 'Problems', icon: Code },
     { href: '/topics', label: 'Topics', icon: BookOpen },
     // { href: '/profile', label: 'Profile', icon: Trophy },

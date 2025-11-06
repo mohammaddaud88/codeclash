@@ -116,6 +116,27 @@ const handleLearn = async (req, res) => {
     }
 };
 
+const generateLearningPath = async (req, res) => {
+    try {
+        const {topic,level, goal} = req.params
+
+
+        // Prompt for Gemini API
+        const prompt = `You are an data structure and algorithms expert. Write a detailed learning path for the ${topic}.\n and goal is ${goal}\n the level is ${level}`;
+
+        // Call Gemini API
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        // console.log(text)
+
+        res.status(200).json({ geminiData: text });
+    } catch (error) {
+        console.error("Error generating editorial:", error);
+        res.status(500).json({ message: "Failed to generate editorial" });
+    }
+};
+
 // Handler for Editorial
 const handleEditorial = async (req, res) => {
     try {
@@ -141,8 +162,4 @@ const handleEditorial = async (req, res) => {
     }
 };
 
-module.exports = {
-    chatWithGemini: exports.chatWithGemini,
-    handleLearn,
-    handleEditorial
-};
+module.exports = { handleLearn, handleEditorial };

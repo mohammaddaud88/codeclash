@@ -118,12 +118,7 @@ const Problems = () => {
                     >
                       Solve
                     </Link>
-                    <Link
-                      to={`/editorial/${p.id}`}
-                      className="inline-flex items-center px-4 py-2 border border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                    >
-                      Editorial
-                    </Link>
+                    
                   </div>
                 </div>
               ))}
