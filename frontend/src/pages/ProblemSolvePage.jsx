@@ -12,11 +12,13 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import problems from "../assets/problems.json";git 
+import problems from "../assets/problems.json";
 import { ToastContainer, toast } from "react-toastify";
+// import problems from "../assets/problems.json"
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
 import Submission from "./Submission";
+import ChatBot from "../components/Chatbot/chatbot";
 
 const AI_GUIDE_STORAGE_KEY = "aiGuideCache";
 
@@ -31,7 +33,6 @@ const ProblemSolvePage = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [selectedTestCase, setSelectedTestCase] = useState(0);
   const [passedTestCases, setPassedTestCases] = useState(0);
-  const { id } = useParams();
   const containerRef = useRef(null);
   let editorRef = useRef(null);
   let totalTestCases = 0;
@@ -42,8 +43,11 @@ const ProblemSolvePage = () => {
   const [showFailed, setShowFailed] = useState(false);
 
   // console.log(problems)
+  const { id } = useParams();
   const [currentProblemId, setCurrentProblemId] = useState(id);
-  const currentProblem = problems[currentProblemId - 1];
+  const currentProblem = problems.find(
+    (problem) => problem.id === Number(id)
+  );
 
   // console.log(currentProblem);
 
@@ -95,7 +99,7 @@ int main() {
           "Content-Type": "application/json",
 
         },
-        body: JSON.stringify({userId:username, code, language, problemId:currentProblemId, status: passedTestCases === currentProblem.testCases.length ? 'Accepted' : passedTestCases === 0 ? 'Pending' : 'Partial' }),
+        body: JSON.stringify({ userId: username, code, language, problemId: currentProblemId, status: passedTestCases === currentProblem.testCases.length ? 'Accepted' : passedTestCases === 0 ? 'Pending' : 'Partial' }),
       });
       const data = await res.json();
       toast.success("Code submitted successfully!");
@@ -145,7 +149,7 @@ int main() {
     setShowFailed(false);
     try {
       if (!localStorage.getItem("email")) {
-        toast.warning("Please Login to Continue",{autoClose:2000});
+        toast.warning("Please Login to Continue", { autoClose: 2000 });
         navigate("/login");
         return;
       }
@@ -216,8 +220,7 @@ int main() {
           setOutput(
             (prev) =>
               prev +
-              `Test ${i + 1} [${status}]\nInput:\n${tc.input}\nExpected:\n${
-                tc.expected ?? "—"
+              `Test ${i + 1} [${status}]\nInput:\n${tc.input}\nExpected:\n${tc.expected ?? "—"
               }\nOutput:\n${out}\n\n-----------------\n\n`
           );
         } catch (e) {
@@ -235,8 +238,7 @@ int main() {
           setOutput(
             (prev) =>
               prev +
-              `Test ${i + 1} [FAIL]\nInput:\n${tc.input}\nExpected:\n${
-                tc.expected ?? "—"
+              `Test ${i + 1} [FAIL]\nInput:\n${tc.input}\nExpected:\n${tc.expected ?? "—"
               }\nOutput:\n${out}\n\n-----------------\n\n`
           );
         }
@@ -288,15 +290,15 @@ int main() {
 
   const [showChat, setShowChat] = useState(false);
   const [aiGuide, setAiGuide] = useState(() => {
-  const cache = JSON.parse(
-    localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
-  );
-  const now = Date.now();
-  if (cache[id] && cache[id].expire && cache[id].expire > now) {
-    return cache[id].guide;
-  }
-  return "";
-});
+    const cache = JSON.parse(
+      localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
+    );
+    const now = Date.now();
+    if (cache[id] && cache[id].expire && cache[id].expire > now) {
+      return cache[id].guide;
+    }
+    return "";
+  });
   const [aiGuideLoading, setAiGuideLoading] = useState(false);
   const [aiGuideError, setAiGuideError] = useState("");
   const [aiCode, setAiCode] = useState("");
@@ -307,8 +309,7 @@ int main() {
     setAiCodeLoading(true);
     setAiCode("");
     fetch(
-      `${
-        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      `${import.meta.env.VITE_API_URL || "http://localhost:8000"
       }/gemini/code/${currentProblemId}?lang=${codeLanguageForAI}`
     )
       .then((res) => res.json())
@@ -327,7 +328,7 @@ int main() {
     const cache = JSON.parse(
       localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
     );
-    const now = Date.now();const expireTime = now + 3 * 60 * 60 * 1000; // 3 hours
+    const now = Date.now(); const expireTime = now + 3 * 60 * 60 * 1000; // 3 hours
     cache[problemId] = { guide, expire: expireTime };
     localStorage.setItem(AI_GUIDE_STORAGE_KEY, JSON.stringify(cache));
   };
@@ -336,8 +337,7 @@ int main() {
     setAiGuideLoading(true);
     setAiGuideError("");
     fetch(
-      `${
-        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      `${import.meta.env.VITE_API_URL || "http://localhost:8000"
       }/gemini/learn/${currentProblemId}`
     )
       .then((res) => res.json())
@@ -366,6 +366,52 @@ int main() {
     setAiGuideError("");
     setAiGuideLoading(false);
   }, [currentProblemId]);
+
+  const formatAiGuide = (text) => {
+    if (!text) return "";
+
+    const escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    return (
+      escaped
+        // Headings
+        .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold mt-6 mb-3">$1</h3>')
+        .replace(/^#### (.*$)/gim, '<h4 class="text-lg font-semibold mt-4 mb-2">$1</h4>')
+        .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-6 mb-3 border-b pb-2">$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-8 mb-4 border-b pb-2">$1</h1>')
+
+        // Code blocks
+        .replace(/```([\s\S]*?)```/gim, `
+        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 my-3 overflow-x-auto">
+          <code class="font-mono text-sm">$1</code>
+        </pre>
+      `)
+
+        // Inline code
+        .replace(/`([^`]+)`/gim, "<code class='bg-gray-200 text-gray-900 rounded px-1'>$1</code>")
+
+        // Bold, italic
+        .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/gim, "<em>$1</em>")
+
+        // Lists
+        .replace(/^\s*[-*]\s+(.*$)/gim, "<li class='ml-6 list-disc'>$1</li>")
+        .replace(/(\<\/li\>\s*)(?!\s*<li)/gim, "</ul>")
+        .replace(/<li/gim, "<ul><li")
+
+        // Horizontal rules
+        .replace(/---/g, "<hr class='my-4 border-gray-300'/>")
+
+        // Paragraphs and newlines
+        .replace(/\n{2,}/g, "</p><p>")
+        .replace(/\n/g, "<br/>")
+        .replace(/^/, "<p>")
+        .replace(/$/, "</p>")
+    );
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -538,59 +584,12 @@ int main() {
 
               {aiGuide && !aiGuideLoading && (
                 <>
-                  <div className="prose prose-lg max-w-none bg-white p-8 rounded-xl shadow-lg border">
-                    <ReactMarkdown
-                      children={aiGuide}
-                      components={{
-                        code({ node, inline, className, children, ...props }) {
-                          const match = /language-(\w+)/.exec(className || "");
-                          return !inline && match ? (
-                            <SyntaxHighlighter
-                              children={String(children).replace(/\n$/, "")}
-                              style={vscDarkPlus}
-                              language={match}
-                              PreTag="div"
-                              {...props}
-                            />
-                          ) : (
-                            <code className={className} {...props}>
-                              {children}
-                            </code>
-                          );
-                        },
-                        h1: ({ node, ...props }) => (
-                          <h1
-                            className="text-3xl font-bold mt-8 mb-4 border-b pb-2"
-                            {...props}
-                          />
-                        ),
-                        h2: ({ node, ...props }) => (
-                          <h2
-                            className="text-2xl font-semibold mt-6 mb-3 border-b pb-2"
-                            {...props}
-                          />
-                        ),
-                        h3: ({ node, ...props }) => (
-                          <h3
-                            className="text-xl font-semibold mt-6 mb-3"
-                            {...props}
-                          />
-                        ),
-                        p: ({ node, ...props }) => (
-                          <p className="leading-relaxed my-4" {...props} />
-                        ),
-                        ul: ({ node, ...props }) => (
-                          <ul className="list-disc pl-8 my-4" {...props} />
-                        ),
-                        ol: ({ node, ...props }) => (
-                          <ol className="list-decimal pl-8 my-4" {...props} />
-                        ),
-                        li: ({ node, ...props }) => (
-                          <li className="my-2" {...props} />
-                        ),
-                      }}
-                    />
-                  </div>
+                  <div
+                    className="prose prose-lg max-w-none bg-white p-8 rounded-xl shadow-lg border ai-guide-content"
+                    dangerouslySetInnerHTML={{
+                      __html: formatAiGuide(aiGuide),
+                    }}
+                  />
                   <div className="flex justify-center mt-8">
                     <button
                       onClick={handleGenerateAiGuide}
@@ -751,11 +750,10 @@ int main() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer ${
-                  activeTab === tab.id
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                className={`px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer ${activeTab === tab.id
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
               >
                 {tab.label}
                 {activeTab === tab.id && (
@@ -813,12 +811,12 @@ int main() {
                   {language === "python"
                     ? "py"
                     : language === "javascript"
-                    ? "js"
-                    : language === "java"
-                    ? "java"
-                    : language === "cpp"
-                    ? "cpp"
-                    : "txt"}
+                      ? "js"
+                      : language === "java"
+                        ? "java"
+                        : language === "cpp"
+                          ? "cpp"
+                          : "txt"}
                 </div>
               </div>
 
@@ -842,7 +840,7 @@ int main() {
                         editorRef.current
                           .getAction("editor.action.formatDocument")
                           ?.run();
-                      } catch (_) {}
+                      } catch (_) { }
                     }
                   }}
                   className="text-xs bg-gray-800 text-gray-200 px-3 py-1 rounded hover:bg-gray-700"
@@ -869,15 +867,14 @@ int main() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = `solution.${
-                      language === "python"
-                        ? "py"
-                        : language === "javascript"
+                    a.download = `solution.${language === "python"
+                      ? "py"
+                      : language === "javascript"
                         ? "js"
                         : language === "java"
-                        ? "java"
-                        : "cpp"
-                    }`;
+                          ? "java"
+                          : "cpp"
+                      }`;
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
@@ -937,8 +934,8 @@ int main() {
                     const colorClass = passed
                       ? "bg-green-100 text-green-700"
                       : failed
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200";
+                        ? "bg-red-100 text-red-700"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200";
                     return (
                       <button
                         key={index}
@@ -968,13 +965,12 @@ int main() {
                     Input:
                   </div>
                   <div
-                    className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${
-                      results[selectedTestCase]?.pass === true
-                        ? "border-green-500"
-                        : results[selectedTestCase]?.pass === false
+                    className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${results[selectedTestCase]?.pass === true
+                      ? "border-green-500"
+                      : results[selectedTestCase]?.pass === false
                         ? "border-red-500"
                         : "border-gray-800"
-                    }`}
+                      }`}
                   >
                     {currentProblem.testCases[selectedTestCase]?.input}
                   </div>
@@ -984,13 +980,12 @@ int main() {
                     Expected:
                   </div>
                   <div
-                    className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${
-                      results[selectedTestCase]?.pass === true
-                        ? "border-green-500"
-                        : results[selectedTestCase]?.pass === false
+                    className={`bg-gray-800 text-gray-100 p-3 rounded font-mono text-xs whitespace-pre-wrap border ${results[selectedTestCase]?.pass === true
+                      ? "border-green-500"
+                      : results[selectedTestCase]?.pass === false
                         ? "border-red-500"
                         : "border-gray-800"
-                    }`}
+                      }`}
                   >
                     {currentProblem.testCases[selectedTestCase]?.expected}
                   </div>
@@ -1106,12 +1101,12 @@ int main() {
         >
           {showChat ? (
             <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-              <path d="M6 6l8 8M14 6l-8 8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M6 6l8 8M14 6l-8 8" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           ) : (
             // Chat bubble icon
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <path d="M21 14.5a2.5 2.5 0 01-2.5 2.5H7.414a1 1 0 00-.707.293l-2.707 2.707A1 1 0 013 18.586V5.5A2.5 2.5 0 015.5 3h13A2.5 2.5 0 0121 5.5v9z" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+              <path d="M21 14.5a2.5 2.5 0 01-2.5 2.5H7.414a1 1 0 00-.707.293l-2.707 2.707A1 1 0 013 18.586V5.5A2.5 2.5 0 015.5 3h13A2.5 2.5 0 0121 5.5v9z" stroke="white" strokeWidth="2" strokeLinejoin="round" />
             </svg>
           )}
         </button>
@@ -1134,9 +1129,9 @@ int main() {
             }}
             className="shadow-2xl border border-gray-200"
           >
-            <ChatBot 
-              problemId={id} 
-              problemData = {currentProblem}
+            <ChatBot
+              problemId={id}
+              problemData={currentProblem}
             />
           </div>
         )}

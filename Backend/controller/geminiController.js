@@ -162,4 +162,11 @@ const handleEditorial = async (req, res) => {
     }
 };
 
-module.exports = { handleLearn, handleEditorial };
+// Export all handlers. `chatWithGemini` was assigned to `exports.chatWithGemini` above,
+// so reference it here to ensure it's included when the module is required.
+module.exports = {
+    chatWithGemini: exports.chatWithGemini,
+    generateLearningPath,
+    handleLearn,
+    handleEditorial
+};
