@@ -40,14 +40,14 @@ function App() {
       <main>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/explore" element={<Explore />} />
+            {/* <Route path="/explore" element={<Explore />} /> */}
             <Route path="/problems" element={<Problems />} />
             <Route path="/problemsolve/:id" element={<ProblemSolvePage />} />
-            <Route path="/editorial/:id" element={<Editorial />} />
+            {/* <Route path="/editorial/:id" element={<Editorial />} /> */}
             <Route path="/topics" element={<Topics />} />
             <Route path="/topics/:topicName" element={<TopicPage />} />
-            <Route path="/playground" element={<Playground />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
+            {/* <Route path="/playground" element={<Playground />} /> */}
+            {/* <Route path="/leaderboard" element={<Leaderboard />} /> */}
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { BrainCircuit, Search } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // The topic prop is important for context!
 // Assume userId is passed down from a parent component or context
@@ -38,7 +41,7 @@ const AskAI = ({ userId, topic }) => {
     };
 
     return (
-        <div className="bg-slate-800/50 rounded-xl shadow-lg border border-slate-800 p-8">
+        <div className="bg-slate-800/50 rounded-xl shadow-lg border border-slate-800 py-8 px-6">
             <div className="flex items-center mb-4">
                 <BrainCircuit className="w-8 h-8 text-cyan-400 mr-4" />
                 <h2 className="text-2xl font-bold text-slate-100">Ask AI</h2>
@@ -65,9 +68,31 @@ const AskAI = ({ userId, topic }) => {
 
             {/* Display loading state or the answer from the AI */}
             {isLoading && <p className="mt-4 text-slate-300">Generating answer...</p>}
-            {answer && (
-                <div className="mt-4 p-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-slate-200 whitespace-pre-wrap">{answer}</p>
+            {answer && !isLoading && (
+                <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                    <div className="prose prose-invert max-w-none">
+                        <ReactMarkdown
+                            children={answer}
+                            components={{
+                                code({ node, inline, className, children, ...props }) {
+                                    const match = /language-(\w+)/.exec(className || "");
+                                    return !inline && match ? (
+                                        <SyntaxHighlighter
+                                            children={String(children).replace(/\n$/, "")}
+                                            style={vscDarkPlus}
+                                            language={match[1]}
+                                            PreTag="div"
+                                            {...props}
+                                        />
+                                    ) : (
+                                        <code className={className} {...props}>
+                                            {children}
+                                        </code>
+                                    );
+                                },
+                            }}
+                        />
+                    </div>
                 </div>
             )}
         </div>

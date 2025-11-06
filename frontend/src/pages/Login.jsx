@@ -53,6 +53,7 @@ const LoginPageSideBySide = () => {
       sessionStorage.setItem('isLoggedIn',true);
       toast.success(resp.message);
       navigate('/')
+      window.location.reload();
     }catch(err){
       console.log(err);
       toast.error(err.message);

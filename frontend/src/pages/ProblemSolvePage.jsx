@@ -17,6 +17,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
 import Submission from "./Submission";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const AI_GUIDE_STORAGE_KEY = "aiGuideCache";
 
@@ -283,8 +286,6 @@ int main() {
   const tabs = [
     { id: "description", label: "Description" },
     { id: "ai-learn", label: "AI Learn" },
-    { id: "editorial", label: "Editorial" },
-    { id: "solutions", label: "Solutions" },
     { id: "submissions", label: "Submissions" },
   ];
 
@@ -328,8 +329,7 @@ int main() {
     const cache = JSON.parse(
       localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
     );
-    const now = Date.now();
-    const expireTime = now + 24 * 60 * 60 * 1000; // 24 hours
+    const now = Date.now();const expireTime = now + 3 * 60 * 60 * 1000; // 3 hours
     cache[problemId] = { guide, expire: expireTime };
     localStorage.setItem(AI_GUIDE_STORAGE_KEY, JSON.stringify(cache));
   };
@@ -360,7 +360,11 @@ int main() {
     const cache = JSON.parse(
       localStorage.getItem(AI_GUIDE_STORAGE_KEY) || "{}"
     );
-    setAiGuide(cache[currentProblemId] || "");
+    const cachedItem = cache[currentProblemId];
+    const now = Date.now();
+    if (cachedItem && cachedItem.expire && cachedItem.expire > now) {
+      setAiGuide(cachedItem.guide || "");
+    }
     setAiGuideError("");
     setAiGuideLoading(false);
   }, [currentProblemId]);
@@ -536,215 +540,58 @@ int main() {
 
               {aiGuide && !aiGuideLoading && (
                 <>
-                  {/* Render your guide as before */}
-                  <div className="space-y-6">
-                    {aiGuide &&
-                      aiGuide.split(/(?=###\s)/).map((section, idx) => {
-                        const lines = section.trim().split("\n");
-                        const titleMatch =
-                          lines[0]?.match(/^###\s+\d+\.\s+(.+)/);
-                        const title = titleMatch ? titleMatch[1] : null;
-                        const content = title
-                          ? lines.slice(1).join("\n").trim()
-                          : section.trim();
-
-                        if (!title) {
-                          return (
-                            <div
-                              key={idx}
-                              className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500"
-                            >
-                              <div className="prose prose-sm max-w-none">
-                                <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed font-sans">
-                                  {content}
-                                </pre>
-                              </div>
-                            </div>
+                  <div className="prose prose-lg max-w-none bg-white p-8 rounded-xl shadow-lg border">
+                    <ReactMarkdown
+                      children={aiGuide}
+                      components={{
+                        code({ node, inline, className, children, ...props }) {
+                          const match = /language-(\w+)/.exec(className || "");
+                          return !inline && match ? (
+                            <SyntaxHighlighter
+                              children={String(children).replace(/\n$/, "")}
+                              style={vscDarkPlus}
+                              language={match}
+                              PreTag="div"
+                              {...props}
+                            />
+                          ) : (
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
                           );
-                        }
-
-                        const getIconAndColor = (title) => {
-                          if (
-                            title.includes("Analysis") ||
-                            title.includes("Intuition")
-                          ) {
-                            return {
-                              icon: "🎯",
-                              color: "blue",
-                              bg: "bg-blue-50",
-                              border: "border-blue-500",
-                            };
-                          }
-                          if (title.includes("Hints")) {
-                            return {
-                              icon: "💡",
-                              color: "yellow",
-                              bg: "bg-yellow-50",
-                              border: "border-yellow-500",
-                            };
-                          }
-                          if (title.includes("Mistakes")) {
-                            return {
-                              icon: "⚠️",
-                              color: "red",
-                              bg: "bg-red-50",
-                              border: "border-red-500",
-                            };
-                          }
-                          if (title.includes("Visual")) {
-                            return {
-                              icon: "🎨",
-                              color: "purple",
-                              bg: "bg-purple-50",
-                              border: "border-purple-500",
-                            };
-                          }
-                          if (
-                            title.includes("Solution") ||
-                            title.includes("Approach")
-                          ) {
-                            return {
-                              icon: "✅",
-                              color: "green",
-                              bg: "bg-green-50",
-                              border: "border-green-500",
-                            };
-                          }
-                          if (title.includes("Code")) {
-                            return {
-                              icon: "💻",
-                              color: "indigo",
-                              bg: "bg-indigo-50",
-                              border: "border-indigo-500",
-                            };
-                          }
-                          if (title.includes("Complexity")) {
-                            return {
-                              icon: "⚡",
-                              color: "orange",
-                              bg: "bg-orange-50",
-                              border: "border-orange-500",
-                            };
-                          }
-                          return {
-                            icon: "📝",
-                            color: "gray",
-                            bg: "bg-gray-50",
-                            border: "border-gray-500",
-                          };
-                        };
-
-                        const { icon, bg, border } = getIconAndColor(title);
-
-                        return (
-                          <div
-                            key={idx}
-                            className={`bg-white rounded-xl shadow-md overflow-hidden border-l-4 ${border}`}
-                          >
-                            <div
-                              className={`${bg} px-6 py-4 border-b border-gray-200`}
-                            >
-                              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                                <span className="text-2xl">{icon}</span>
-                                {title}
-                              </h3>
-                            </div>
-                            <div className="p-6">
-                              <div className="prose prose-sm max-w-none">
-                                {content.split("```").map((block, blockIdx) => {
-                                  if (blockIdx % 2 === 1) {
-                                    const [lang, ...codeLines] =
-                                      block.split("\n");
-                                    const code = codeLines.join("\n").trim();
-                                    return (
-                                      <div key={blockIdx} className="my-4">
-                                        <div className="bg-gray-900 rounded-t-lg px-4 py-2 flex items-center justify-between">
-                                          <span className="text-xs font-mono text-gray-400">
-                                            {lang || "code"}
-                                          </span>
-                                          <button
-                                            onClick={() => {
-                                              navigator.clipboard.writeText(
-                                                code
-                                              );
-                                              toast.info("Code copied!", {
-                                                autoClose: 1000,
-                                              });
-                                            }}
-                                            className="text-xs text-gray-400 hover:text-white transition-colors"
-                                          >
-                                            Copy
-                                          </button>
-                                        </div>
-                                        <pre className="bg-gray-900 text-gray-100 p-4 rounded-b-lg overflow-x-auto">
-                                          <code className="text-sm font-mono">
-                                            {code}
-                                          </code>
-                                        </pre>
-                                      </div>
-                                    );
-                                  }
-                                  return (
-                                    <div
-                                      key={blockIdx}
-                                      className="whitespace-pre-wrap text-gray-700 leading-relaxed"
-                                    >
-                                      {block
-                                        .split("\n")
-                                        .map((line, lineIdx) => {
-                                          if (
-                                            line.trim().startsWith("*   ") ||
-                                            line.trim().startsWith("- ")
-                                          ) {
-                                            return (
-                                              <div
-                                                key={lineIdx}
-                                                className="flex gap-2 my-2"
-                                              >
-                                                <span className="text-blue-500 font-bold">
-                                                  •
-                                                </span>
-                                                <span>
-                                                  {line.replace(
-                                                    /^[\s]*[\*\-]\s+/,
-                                                    ""
-                                                  )}
-                                                </span>
-                                              </div>
-                                            );
-                                          }
-                                          if (
-                                            line.trim().startsWith("**") &&
-                                            line.trim().endsWith("**")
-                                          ) {
-                                            return (
-                                              <div
-                                                key={lineIdx}
-                                                className="font-bold text-gray-900 mt-4 mb-2"
-                                              >
-                                                {line.replace(/\*\*/g, "")}
-                                              </div>
-                                            );
-                                          }
-                                          return (
-                                            line && (
-                                              <div
-                                                key={lineIdx}
-                                                className="my-1"
-                                              >
-                                                {line}
-                                              </div>
-                                            )
-                                          );
-                                        })}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                        },
+                        h1: ({ node, ...props }) => (
+                          <h1
+                            className="text-3xl font-bold mt-8 mb-4 border-b pb-2"
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <h2
+                            className="text-2xl font-semibold mt-6 mb-3 border-b pb-2"
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <h3
+                            className="text-xl font-semibold mt-6 mb-3"
+                            {...props}
+                          />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <p className="leading-relaxed my-4" {...props} />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul className="list-disc pl-8 my-4" {...props} />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol className="list-decimal pl-8 my-4" {...props} />
+                        ),
+                        li: ({ node, ...props }) => (
+                          <li className="my-2" {...props} />
+                        ),
+                      }}
+                    />
                   </div>
                   <div className="flex justify-center mt-8">
                     <button
@@ -875,7 +722,7 @@ int main() {
             <button
               onClick={handleRunCode}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="w-4 h-4" />
               <span className="text-sm font-medium">
@@ -884,7 +731,7 @@ int main() {
             </button>
             <button
               onClick={handleSubmit}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <Send className="w-4 h-4" />
               <span className="text-sm font-medium">Submit</span>
@@ -906,7 +753,7 @@ int main() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+                className={`px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer ${
                   activeTab === tab.id
                     ? "text-blue-600 bg-blue-50"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"

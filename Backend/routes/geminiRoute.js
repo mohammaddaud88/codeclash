@@ -5,5 +5,6 @@ const geminiController = require('../controller/geminiController');
 // Mount all Gemini controller routes directly
 router.get('/learn/:problemId', geminiController.handleLearn);
 router.get('/editorial/:problemId', geminiController.handleEditorial);
+router.post('/learningpath/:topic/:level/:goal',geminiController.generateLearningPath);
 
 module.exports = router;
