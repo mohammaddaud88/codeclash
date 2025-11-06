@@ -52,7 +52,7 @@ const Navbar = () => {
     { href: '/explore', label: 'Explore', icon: LayoutDashboard },
     { href: '/problems', label: 'Problems', icon: Code },
     { href: '/topics', label: 'Topics', icon: BookOpen },
-    { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    // { href: '/profile', label: 'Profile', icon: Trophy },
     // Only show Profile if logged in
     ...(isLoggedIn ? [{ href: '/profile', label: 'Profile', icon: User }] : []),
   ];

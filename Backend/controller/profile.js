@@ -43,14 +43,15 @@ const CreateProfileData = async (req,res) =>{
 
 const GetProfileData = async (req,res) =>{
     try{
-        const {email} = req.body;
-        const UserProfile = await ProfileSchema.findOne({email:email});
-        UserProfile.problemSolved = codeSubmitSchema.count({userId:email})
-        UserProfile.save();
+        const {email} = req.params;
+        const UserProfile = await ProfileSchema.findOne({ email: email });
+
         if(!UserProfile){
-            return res.status(500).json({message:"Profile not found"})
+            return res.status(404).json({message:"Profile not found"})
         }
 
+        UserProfile.problemSolved = await codeSubmitSchema.countDocuments({ userId: email });
+        await UserProfile.save();
         return res.status(200).json({userProfile:UserProfile})
     }catch(e){
         return res.status(500).json({message:e.message})
@@ -60,7 +61,7 @@ const GetProfileData = async (req,res) =>{
 
 const UpdateProfileData = async (req,res) =>{
     try{
-        const {email} = req.body;
+        const {email} = req.params;
         if(!email){
             return res.status(400).json({message:"Email is required"})
         }
@@ -74,7 +75,6 @@ const UpdateProfileData = async (req,res) =>{
         UserProfile.country = country;
         UserProfile.bio = bio;
         UserProfile.image = image;
-        UserProfile.problemSolved = problemSolved;
         UserProfile.linkedIn = linkedIn;
         UserProfile.github = github;
         
@@ -87,4 +87,25 @@ const UpdateProfileData = async (req,res) =>{
     }
 }
 
-module.exports = {CreateProfileData,GetProfileData,UpdateProfileData}
+const GetSubmissions = async (req,res) =>{
+    try{
+        const {email} = req.params;
+        const { problemId } = req.query;
+
+        let query = { userId: email };
+        if (problemId) {
+          query.problemId = problemId;
+        }
+        const submissions = await codeSubmitSchema.find(query).sort({createdAt: -1});
+
+        if(!submissions || submissions.length === 0){
+            return res.status(404).json({message:"No submissions found"})
+        }
+
+        return res.status(200).json({submissions:submissions})
+    }catch(e){
+        return res.status(500).json({message:e.message})
+    }
+}
+
+module.exports = {CreateProfileData,GetProfileData,UpdateProfileData, GetSubmissions}

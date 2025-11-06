@@ -29,9 +29,16 @@ const ProfilePage = () => {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/profile/${userId}`);
+      const response = await fetch(`http://localhost:8000/api/profile/${userId}`);
       const data = await response.json();
-      setProfileData(data);
+      if (data.userProfile) {
+        setProfileData(prev => ({
+          ...prev,
+          ...data.userProfile,
+        }));
+      } else {
+        toast.error('Profile not found.');
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -42,7 +49,7 @@ const ProfilePage = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/profile/${userId}`, {
+      const response = await fetch(`http://localhost:8000/api/update/profile/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -67,14 +74,31 @@ const ProfilePage = () => {
     }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleInputChange('image', reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+    setLoading(true);
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.secure_url) {
+        handleInputChange('image', data.secure_url);
+        toast.success('Profile picture updated!');
+      }
+    } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error);
+      toast.error('Failed to upload image.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,8 +168,8 @@ const ProfilePage = () => {
                     <input
                       type="text"
                       value={userId}
-                      onChange={toast.warn('Can not be changed')}
                       className="text-gray-600 bg-transparent border-b border-gray-300 focus:border-blue-600 outline-none"
+                      readOnly
                       placeholder="@email"
                     />
                   </div>
@@ -155,9 +179,8 @@ const ProfilePage = () => {
                       {profileData.name || 'Add your name'}
                     </h1>
                     <p className="text-lg text-gray-600 mb-1">
-                      @{profileData.username || 'username'}
+                      {profileData.email || 'username'}
                     </p>
-                    <p className="text-gray-500">{profileData.email}</p>
                   </div>
                 )}
               </div>
@@ -321,19 +344,11 @@ const ProfilePage = () => {
                 Coding Stats
               </h2>
               <div className="text-center">
-                {isEditing ? (
-                  <input
-                    type="number"
-                    value={profileData.problemSolved}
-                    onChange={(e) => handleInputChange('problemSolved', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
-                    placeholder="0"
-                  />
-                ) : (
+                {
                   <div className="text-3xl font-bold text-blue-600 mb-1">
                     {profileData.problemSolved || '0'}
                   </div>
-                )}
+                }
                 <p className="text-gray-600">Problems Solved</p>
               </div>
             </div>

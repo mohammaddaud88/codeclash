@@ -16,6 +16,7 @@ import problems from "../assets/problems.json";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
+import Submission from "./Submission";
 
 const AI_GUIDE_STORAGE_KEY = "aiGuideCache";
 
@@ -94,7 +95,7 @@ int main() {
           "Content-Type": "application/json",
 
         },
-        body: JSON.stringify({userId:username, code, language, problemId:currentProblemId }),
+        body: JSON.stringify({userId:username, code, language, problemId:currentProblemId, status: passedTestCases === currentProblem.testCases.length ? 'Accepted' : passedTestCases === 0 ? 'Pending' : 'Partial' }),
       });
       const data = await res.json();
       toast.success("Code submitted successfully!");
@@ -800,14 +801,7 @@ int main() {
         );
       case "submissions":
         return (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="text-gray-400 text-lg mb-2">Coming Soon</div>
-              <div className="text-gray-500 text-sm">
-                This section is under development
-              </div>
-            </div>
-          </div>
+          <Submission problemId={currentProblemId} />
         );
       default:
         return (

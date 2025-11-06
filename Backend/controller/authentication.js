@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const signupModel = require("../models/signup");
+const profile = require('../models/profile')
 const bcrypt = require("bcryptjs");
 const { setUser } = require("../config/token");
 
@@ -33,6 +34,14 @@ async function signUp(req, res) {
       agreeToTerms,
       subscribeNewsletter,
     });
+
+    const userProfile = await profile.create({
+      name,
+      email,
+    });
+
+    await newUser.save();
+    await userProfile.save();
 
     res
       .status(201)
