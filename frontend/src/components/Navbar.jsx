@@ -101,7 +101,7 @@ const Navbar = () => {
               // Show logout button when logged in
               <button
                 onClick={logout}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-red-400 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-400/20"
+                className="flex cursor-pointer items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-red-400 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-400/20"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -168,7 +168,7 @@ const Navbar = () => {
                     logout();
                     setIsMenuOpen(false);
                   }}
-                  className="flex items-center justify-center space-x-2 w-full px-4 py-3 text-base font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-red-400 rounded-lg transition-all duration-200"
+                  className="flex cursor-pointer items-center justify-center space-x-2 w-full px-4 py-3 text-base font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-red-400 rounded-lg transition-all duration-200"
                 >
                   <LogOut className="w-5 h-5" />
                   <span>Logout</span>

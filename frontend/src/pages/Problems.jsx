@@ -118,7 +118,6 @@ const Problems = () => {
                     >
                       Solve
                     </Link>
-                    
                   </div>
                 </div>
               ))}
